@@ -1,6 +1,6 @@
 ﻿namespace Com2usWebProject.Services
 {
-    public class AccountDB : InterfaceAccountDB
+    public class InterfaceAccountDB
     {
     }
 }
