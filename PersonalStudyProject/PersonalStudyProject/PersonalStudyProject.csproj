@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{63A70B76-4309-4066-9E1A-B43EEFD50475}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Com2usServer</RootNamespace>
-    <AssemblyName>Com2usServer</AssemblyName>
+    <RootNamespace>PersonalStudyProject</RootNamespace>
+    <AssemblyName>PersonalStudyProject</AssemblyName>
     <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
