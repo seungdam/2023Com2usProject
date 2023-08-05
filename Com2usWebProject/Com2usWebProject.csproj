@@ -7,11 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CloudStructures" Version="3.2.0" />
+    <PackageReference Include="MySqlConnector" Version="2.2.7" />
+    <PackageReference Include="SqlKata" Version="2.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="ZLogger" Version="1.7.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="ModelDB\" />
+    <Folder Include="ModelResReq\" />
   </ItemGroup>
 
 </Project>
