@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 using Com2usWebProject.ModelDB;
 using ZLogger;
+using SqlKata;
+using System.Security.Principal;
 
 public class DBInfo
 {
@@ -48,19 +50,26 @@ namespace Com2usWebProject.Services
         }
 
 
-        public async Task<CSCommon.ErrorCode> CreateAccountAsync(string email, string pw)
+        public async Task<CSCommon.ErrorCode> CreateAccountAsync(String email, String pw)
         {
             try
             {
-
+                var existAccountInfo = await m_qf.Query("clientlogininfo").Where("Email",email).ExistsAsync();
+                if (existAccountInfo)
+                {
+                   
+                    return CSCommon.ErrorCode.CreateAccountFailAlreadyExist;
+                }
                 var count = await m_qf.Query("clientlogininfo").InsertAsync(new
                 {
                     Email = email,
                     Pw = pw
-                }); 
+                });
 
+               
                 if (count != 1)
                 {
+                    //m_logger.ZLogError($"[AccountDb.CreateAccount] ErrorCode: {CSCommon.ErrorCode.CreateAccountFailException}, Email: {email}");
                     return CSCommon.ErrorCode.CreateAccountFailInsert;
                 }
 
@@ -68,11 +77,45 @@ namespace Com2usWebProject.Services
             }
             catch (Exception e)
             {
-                m_logger.ZLogError(e,
-                    $"[AccountDb.CreateAccount] ErrorCode: {CSCommon.ErrorCode.CreateAccountFailException}, Email: {email}");
+                //m_logger.ZLogError(e,
+                //    $"[AccountDb.CreateAccount] ErrorCode: {CSCommon.ErrorCode.CreateAccountFailException}, Email: {email}");
                 return CSCommon.ErrorCode.CreateAccountFailException;
             }
         }
+
+        public async Task<CSCommon.ErrorCode> VerifyAccount(String email, String pw)
+        {
+           
+            try
+            {
+               
+                var existAccountInfo = await m_qf.Query("clientlogininfo").Where("Email", email).FirstOrDefaultAsync<AccountModel>();
+
+                if (existAccountInfo is null) // 계정이 존재하지 않는다면
+                {
+                    return CSCommon.ErrorCode.LoginFailUserNotExist;
+                }
+                
+                if (existAccountInfo.Password != pw) // 비번 틀림
+                {
+                        //m_logger.ZLogError($"[AccountDb.VerifyAccount] ErrorCode: {CSCommon.ErrorCode.LoginFailPwNotMatch}");
+                        return CSCommon.ErrorCode.LoginFailPwNotMatch;
+                }
+
+                    // 로그인 성공
+                    return CSCommon.ErrorCode.None;
+          
+            }
+            catch (Exception e)
+            {
+                //m_logger.ZLogError(e,
+                   // $"[AccountDb.VerifyAccount] ErrorCode: {CSCommon.ErrorCode.LoginFailException}, Email: {email}");
+                return CSCommon.ErrorCode.LoginFailException;
+            }
+        }
     }
+
+   
+    
 }
     

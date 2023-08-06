@@ -1,9 +1,11 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Com2usWebProject.ModelResReq;
 
-public class PkCreateAccountReq
+
+
+
+public class PkLoginReq
 {
     [Required]
     [MinLength(1, ErrorMessage = "Email CANNOT BE EMPTY")]
@@ -15,10 +17,12 @@ public class PkCreateAccountReq
     [MinLength(1, ErrorMessage = "PASSWORD CANNOT BE EMPTY")]
     [StringLength(10, ErrorMessage = "PASSWORD IS TOO LONG")]
     [DataType(DataType.Password)]
-    public String Password { get; set; }
+
+    public string Password { get; set; }    
 }
 
-public class PkCreateAccountRes
+public class PkLoginRes
 {
-    public CSCommon.ErrorCode Result { get; set; } = CSCommon.ErrorCode.None;
+    [Required] public CSCommon.ErrorCode Result { get; set; } = CSCommon.ErrorCode.None;
 }
+

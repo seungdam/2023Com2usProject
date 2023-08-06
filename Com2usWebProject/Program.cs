@@ -9,8 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 IConfiguration appConfig = builder.Configuration; // appsettings를 통해 config정보를 가져온다
-builder.Services.Configure<DBInfo>(appConfig.GetSection(nameof(DBInfo)));
 
+builder.Services.Configure<DBInfo>(appConfig.GetSection(nameof(DBInfo)));
 
 // Logging 설정하기 ZLogger 라이브러리로 설정
 Host.CreateDefaultBuilder()
@@ -22,7 +22,7 @@ Host.CreateDefaultBuilder()
         {
             options.EnableStructuredLogging = true;
         });
-  });
+    });
 
 // 이미 정의된 서비스들이다.
 
@@ -38,6 +38,7 @@ Host.CreateDefaultBuilder()
 
 // 로그인 같은 경우, 요청이 잦은 사항이 아니고 클라이언트가 요청할 때만 필요하기 때문에 Scoped로 설정
 builder.Services.AddTransient<IAccountDB, AccountDB>();
+
 builder.Services.AddControllers();
 
 
@@ -59,9 +60,11 @@ if (app.Environment.IsDevelopment())
 }
 
 // 빌드 후 수행
-app.UseAuthorization();
+//
 app.UseHttpsRedirection();
-app.MapControllers();
+//app.MapControllers();
 app.UseRouting();
+app.UseAuthorization();
+app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
 app.Run();

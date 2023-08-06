@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using ZLogger;
 
 namespace Com2usWebProject.Controllers;
-    [ApiController]
-    [Route("Controller")]
+  [ApiController]
+  [Route("AccountController")]
     public class AccountController : ControllerBase
     {
         private readonly IAccountDB m_accountDB;
