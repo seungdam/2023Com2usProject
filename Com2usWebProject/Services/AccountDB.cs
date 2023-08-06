@@ -53,7 +53,7 @@ namespace Com2usWebProject.Services
             try
             {
 
-                var count = await m_qf.Query("accountDB").InsertAsync(new
+                var count = await m_qf.Query("clientlogininfo").InsertAsync(new
                 {
                     Email = email,
                     Pw = pw
