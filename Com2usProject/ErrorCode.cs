@@ -9,6 +9,7 @@ namespace CSCommon;
 
     LoginErrorNoExist,
     LoginErrorAlreadyEnter,
+    LoginErrorInvalidPassword,
     LoginErrorException
  }
 
