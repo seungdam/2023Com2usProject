@@ -14,5 +14,5 @@ public interface IAccountDB : IDisposable // 다른 DB를 사용한다고 하더
     Task<CSCommon.ErrorCode> RegisterAccount(String email, String pw); 
     Task<CSCommon.ErrorCode> VerifyAccount(String email, String pw);
 
-    void HashingEmailAndPassword(String email, String pw); // 2023-08-08 Email과 Password를 해싱하는 함수를 제공하자.
+ 
 }

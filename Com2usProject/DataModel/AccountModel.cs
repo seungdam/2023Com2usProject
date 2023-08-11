@@ -7,6 +7,6 @@ namespace Com2usProject.DataModel;
 public class AccountModel
 {
 
-    public String AccountId { get; set; }
-    public String AccountPw { get; set; }
+    public String accountEmail { get; set; }
+    public String accountPassword { get; set; }
 }
