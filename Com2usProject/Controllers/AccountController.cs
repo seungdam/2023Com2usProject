@@ -10,8 +10,9 @@ namespace Com2usProject.Controllers;
 // 2023-08-07~ 2023-08-10 
 // AccountController
 
-[Route("Controller/Register")]
+
 [ApiController]
+[Route("register/[controller]")]
 public  class RegisterAccountController : ControllerBase 
 {
     private readonly IAccountDb _accountDb;
@@ -28,15 +29,9 @@ public  class RegisterAccountController : ControllerBase
     {
         RegisterAccountRes response = new RegisterAccountRes();
 
+    
         var resultValue = await _accountDb.RegisterAccount(request.Email, request.Password);
-
-        if(resultValue != CSCommon.ErrorCode.ErrorNone)
-        {
-            _logger.ZLogError($"Register Error {resultValue}");
-
-        }
         response.Result = resultValue;
-
         return response;
     }
     

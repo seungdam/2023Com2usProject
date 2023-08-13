@@ -8,5 +8,5 @@ public class AccountModel
 {
 
     public String Email { get; set; }
-    public String HashedPassword { get; set; }
+    public String HashPassword { get; set; }
 }
