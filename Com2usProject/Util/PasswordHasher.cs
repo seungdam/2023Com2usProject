@@ -35,7 +35,7 @@ public sealed class MyPasswordHasher
 
         byte[] finalHashBytes = new byte[_hashBytesSize + _saltBytesSize];
         Array.Copy(saltValue, 0, finalHashBytes, 0, _saltBytesSize);
-        Array.Copy(hashedValue, 0, finalHashBytes, _saltBytesSize,_hashBytesSize);
+        Array.Copy(hashedValue, 0, finalHashBytes, _saltBytesSize, _hashBytesSize);
         // 앞에 16바이트는 salt 값을 뒤 32바이트는 해쉬된 값을 넣어 DB에 저장. --> 나중에 검증할 때 사용할 것임
         string hashPassword = Convert.ToBase64String(finalHashBytes);
         return hashPassword;
@@ -50,7 +50,7 @@ public sealed class MyPasswordHasher
         byte[] restoreHashValue = new byte[_hashBytesSize];
 
         Array.Copy(hashBytes, 0, restoreSaltValue, 0, _saltBytesSize);
-        Array.Copy(hashBytes, _saltBytesSize, restoreHashValue, 0, _hashBytesSize);
+        Array.Copy(hashBytes, _saltBytesSize, restoreHashValue,0, _hashBytesSize);
 
         byte[] compareHashedValue = KeyDerivation.Pbkdf2(
             password: password,

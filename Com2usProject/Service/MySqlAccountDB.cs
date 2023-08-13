@@ -14,16 +14,16 @@ using ZLogger;
 namespace Com2usProject.Service;
 
 
-public class DbConnectionString
+public class DbConnectionStrings
 {
     public string MySqlAccountDB { get; set; }
-    public string RedisDB { get; set; }
+    public string RedisTockenDB { get; set; }
 }
 
 public class MySqlAccountDb : IAccountDb // 해당 Account 클래스는 MySql을 사용하므로 클래스명을 MySqlAccountDb라고 짓는다
 {
     readonly ILogger<MySqlAccountDb> _logger;
-    readonly IOptions<DbConnectionString> _dbConfig;
+    readonly IOptions<DbConnectionStrings> _dbConfig;
 
     MyPasswordHasher _pwhasher;
     Compiler         _mySqlComplier;
@@ -33,7 +33,7 @@ public class MySqlAccountDb : IAccountDb // 해당 Account 클래스는 MySql을
     
     
     
-    public MySqlAccountDb(ILogger<MySqlAccountDb> logger, IOptions<DbConnectionString> dbconfig)
+    public MySqlAccountDb(ILogger<MySqlAccountDb> logger, IOptions<DbConnectionStrings> dbconfig)
     {
         _logger = logger;
         _dbConfig = dbconfig;
@@ -55,25 +55,29 @@ public class MySqlAccountDb : IAccountDb // 해당 Account 클래스는 MySql을
     public async Task<CSCommon.ErrorCode> RegisterAccount(String email, String pw)
     {
         
-        var existAccountInfo = await _mySqlQueryFactory.Query("clientlogininfo").Where("Email", email).ExistsAsync();           
-        if (existAccountInfo) return CSCommon.ErrorCode.RegisterErrorAlreadyExist;
-        
-        _pwhasher = new SecurityUtil.MyPasswordHasher();
+        var existAccountInfo = await _mySqlQueryFactory.Query("clientlogininfo").Where("Email", email).ExistsAsync();
+        if (existAccountInfo)
+        {
+            _logger.ZLogError($"[RegisterAccount] ErrorCode: {CSCommon.ErrorCode.RegisterErrorAlreadyExist}, Email: {email} \n");
+            return CSCommon.ErrorCode.RegisterErrorAlreadyExist;
+
+        }
+        _pwhasher = new MyPasswordHasher();
         string hashPassword =  _pwhasher.HashingPassword(pw);
         
         var count = await _mySqlQueryFactory.Query("clientlogininfo").InsertAsync(new
         {
             Email = email,
-            Pw = hashPassword
+            HashPassword = hashPassword
         });
         
         
         if (count != 1)
         {
-            _logger.ZLogError($"[AccountDb.CreateAccount] ErrorCode: {CSCommon.ErrorCode.RegisterErrorFailToInsert}, Email: {email}");
+            _logger.ZLogError($"[AccountDb.CreateAccount] ErrorCode: {CSCommon.ErrorCode.RegisterErrorFailToInsert}, Email: {email} \n");
             return CSCommon.ErrorCode.RegisterErrorFailToInsert;
         }
-
+       
         return CSCommon.ErrorCode.ErrorNone;
     }
 
@@ -82,14 +86,17 @@ public class MySqlAccountDb : IAccountDb // 해당 Account 클래스는 MySql을
         var isAccountExist = await _mySqlQueryFactory.Query("clientlogininfo").Where("Email", email).ExistsAsync();
         if (!isAccountExist) return CSCommon.ErrorCode.LoginErrorNoExist;
 
-        var hashPasswordData = await _mySqlQueryFactory.Query("clientlogininfo").Select("hashPassword").Where("Email", email).FirstOrDefault();
+        var LoginData = await _mySqlQueryFactory.Query("clientlogininfo").Where("Email", email).FirstOrDefaultAsync<AccountModel>();
 
-        if(_pwhasher.VerifyPassword(pw, hashPasswordData)) // 만약 해시 검증에 성공했다면 토큰을 부여하고 
+        if(_pwhasher.VerifyPassword(pw, LoginData.HashPassword)) // 만약 해시 검증에 성공했다면 토큰을 부여하고 
         {
             return CSCommon.ErrorCode.ErrorNone;
         }
         else
         {
+
+            _logger.ZLogError($"[RegisterAccount] ErrorCode: {CSCommon.ErrorCode.LoginErrorInvalidPassword}, Email: {email} \n");
+
             return CSCommon.ErrorCode.LoginErrorInvalidPassword;
         }
     }

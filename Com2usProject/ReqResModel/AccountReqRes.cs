@@ -14,7 +14,6 @@ public class AccountReq
     [Required]
     [MinLength(1, ErrorMessage = "PASSWORD CANNOT BE EMPTY")]
     [StringLength(10, ErrorMessage = "PASSWORD IS TOO LONG")]
-    [RegularExpression("+[a-zA-Z0-9_\\.-]", ErrorMessage = "Password is not valid")]
     [DataType(DataType.Password)]
     public String Password { get; set; }
 }
@@ -27,7 +26,7 @@ public class RegisterAccountRes
 public class LoginAccountRes
 {
 
-    public String UserVerifyString { get; set; }
+    public String AuthPassword { get; set; }
     public CSCommon.ErrorCode Result { get; set; }
 
 }
