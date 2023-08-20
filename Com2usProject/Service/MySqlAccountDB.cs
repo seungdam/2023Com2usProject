@@ -23,6 +23,7 @@ public class DbConnectionStrings
 public class MySqlAccountDb : IAccountDb // 해당 Account 클래스는 MySql을 사용하므로 클래스명을 MySqlAccountDb라고 짓는다
 {
     readonly ILogger<MySqlAccountDb> _logger;
+    readonly IRedisDb _redisDb;
     readonly IOptions<DbConnectionStrings> _dbConfig;
 
     MyPasswordHasher _pwhasher;

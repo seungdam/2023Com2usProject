@@ -14,8 +14,10 @@ namespace Com2usProject.Controllers;
 [Route("login/[controller]")]
 public class LoginAccountController : ControllerBase
 {
-    private readonly IAccountDb _accountDb;
-    private readonly ILogger<LoginAccountController> _logger;
+    readonly IAccountDb _accountDb;
+    readonly IRedisDb _redisTokenDb;
+    readonly ILogger<LoginAccountController> _logger;
+    
 
     public LoginAccountController(ILogger<LoginAccountController> logger, IAccountDb accountDb)
     {
@@ -36,13 +38,13 @@ public class LoginAccountController : ControllerBase
                 byte[] Token = new byte[20];
 
                 rngCsp.GetNonZeroBytes(Token);
-                response.AuthPassword = request.Password + Convert.ToBase64String(Token);
+                response.AuthToken = request.Password + Convert.ToBase64String(Token);
                 response.Result = resultValue;
                 rngCsp.Dispose();
             }
             else
             {
-                response.AuthPassword = "None";
+                response.AuthToken = "None";
                 response.Result = resultValue;
             }
         }
