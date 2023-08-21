@@ -5,8 +5,6 @@ namespace Com2usProject.ReqResModel;
 public class AccountReq
 {
 
-    public String Type = "Account";
-
     [Required]
     [MinLength(1, ErrorMessage = "EMAIL CANNOT BE EMPTY")]
     [StringLength(50, ErrorMessage = "EMAIL IS TOO LONG")]
@@ -23,13 +21,15 @@ public class AccountReq
 
 public class RegisterAccountRes
 {
-    public CSCommon.ErrorCode Result { get; set; }
+    public CSCommon.ErrorCode ErrorCode { get; set; }
 }
 
 public class LoginAccountRes
 {
 
     public String AuthToken { get; set; }
+
+    public String Id { get; set; }
     public CSCommon.ErrorCode ErrorCode { get; set; }
 
 }

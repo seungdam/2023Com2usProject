@@ -19,10 +19,11 @@ public class LoginAccountController : ControllerBase
     readonly ILogger<LoginAccountController> _logger;
     
 
-    public LoginAccountController(ILogger<LoginAccountController> logger, IAccountDb accountDb)
+    public LoginAccountController(ILogger<LoginAccountController> logger, IAccountDb accountDb, IRedisDb redisDb)
     {
         _logger = logger;
         _accountDb = accountDb;
+        _redisTokenDb = redisDb;
     }
 
     [HttpPost]
@@ -33,13 +34,15 @@ public class LoginAccountController : ControllerBase
         {
             var verifyResult = await _accountDb.VerifyAccount(request.Email, request.Password);
             
-            if (verifyResult == CSCommon.ErrorCode.ErrorNone)
+            if (verifyResult.Item1 == CSCommon.ErrorCode.ErrorNone)
             {
                 var rngCsp = new RNGCryptoServiceProvider();
                 byte[] Token = new byte[20];
 
                 rngCsp.GetNonZeroBytes(Token);
                 response.AuthToken = request.Password + Convert.ToBase64String(Token);
+                response.Id = verifyResult.Item2;
+
                 rngCsp.Dispose();
 
                 var addTokenReult = await _redisTokenDb.AddAuthToken(response.AuthToken, request.Email);
@@ -48,14 +51,13 @@ public class LoginAccountController : ControllerBase
                 {
                     response.AuthToken = "None";
                     response.ErrorCode = addTokenReult;
+                   
                 }
-                
-               
             }
             else
             {
                 response.AuthToken = "None";
-                response.ErrorCode = verifyResult;
+                response.ErrorCode = verifyResult.Item1;
             }
         }
         catch (Exception ex)

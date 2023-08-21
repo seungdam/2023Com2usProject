@@ -16,8 +16,10 @@ namespace Com2usProject.Service;
 
 public class DbConnectionStrings
 {
-    public string MySqlAccountDB { get; set; }
-    public string RedisTockenDB { get; set; }
+    public string MySqlAccountDb { get; set; }
+
+    public string MySqlCharacterDb { get; set; }
+    public string RedisTockenDb { get; set; }
 }
 
 public class MySqlAccountDb : IAccountDb // 해당 Account 클래스는 MySql을 사용하므로 클래스명을 MySqlAccountDb라고 짓는다
@@ -39,7 +41,7 @@ public class MySqlAccountDb : IAccountDb // 해당 Account 클래스는 MySql을
         _logger = logger;
         _dbConfig = dbconfig;
         
-        _mySqlDbConnection = new MySqlConnection(dbconfig.Value.MySqlAccountDB);
+        _mySqlDbConnection = new MySqlConnection(dbconfig.Value.MySqlAccountDb);
         _mySqlDbConnection.Open();
 
        
@@ -82,23 +84,21 @@ public class MySqlAccountDb : IAccountDb // 해당 Account 클래스는 MySql을
         return CSCommon.ErrorCode.ErrorNone;
     }
 
-    public async Task<CSCommon.ErrorCode> VerifyAccount(String email, String pw)
+    public async Task<Tuple<CSCommon.ErrorCode,String>> VerifyAccount(String email, String pw)
     {
         var isAccountExist = await _mySqlQueryFactory.Query("clientlogininfo").Where("Email", email).ExistsAsync();
-        if (!isAccountExist) return CSCommon.ErrorCode.LoginErrorNoExist;
+        if (!isAccountExist) return new Tuple<CSCommon.ErrorCode, String>(CSCommon.ErrorCode.LoginErrorNoExist, "None");
 
         var LoginData = await _mySqlQueryFactory.Query("clientlogininfo").Where("Email", email).FirstOrDefaultAsync<AccountModel>();
 
         if(_pwhasher.VerifyPassword(pw, LoginData.HashPassword)) // 만약 해시 검증에 성공했다면 토큰을 부여하고 
         {
-            return CSCommon.ErrorCode.ErrorNone;
+            return new Tuple<CSCommon.ErrorCode,String>(CSCommon.ErrorCode.ErrorNone, LoginData.Id);
         }
         else
         {
-
             _logger.ZLogError($"[RegisterAccount] ErrorCode: {CSCommon.ErrorCode.LoginErrorInvalidPassword}, Email: {email} \n");
-
-            return CSCommon.ErrorCode.LoginErrorInvalidPassword;
+            return new Tuple<CSCommon.ErrorCode, String>(CSCommon.ErrorCode.LoginErrorInvalidPassword, "None");
         }
     }
 

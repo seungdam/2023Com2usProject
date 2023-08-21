@@ -12,7 +12,7 @@ public interface IAccountDb : IDisposable // 다른 DB를 사용한다고 하더
                                           // 수행하기 때문에 해당 두 가지 기능은 필수적으로 들어간다.
 {
     Task<CSCommon.ErrorCode> RegisterAccount(String email, String pw); 
-    Task<CSCommon.ErrorCode> VerifyAccount(String email, String pw);
+    Task<Tuple<CSCommon.ErrorCode,String>> VerifyAccount(String email, String pw);
 
  
 }

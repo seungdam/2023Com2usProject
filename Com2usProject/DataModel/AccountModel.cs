@@ -9,4 +9,6 @@ public class AccountModel
 
     public String Email { get; set; }
     public String HashPassword { get; set; }
+
+    public String Id { get; set; }
 }

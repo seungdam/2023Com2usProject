@@ -31,7 +31,7 @@ public  class RegisterAccountController : ControllerBase
 
     
         var resultValue = await _accountDb.RegisterAccount(request.Email, request.Password);
-        response.Result = resultValue;
+        response.ErrorCode = resultValue;
         return response;
     }
     
