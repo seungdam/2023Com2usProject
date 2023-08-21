@@ -2,8 +2,8 @@
 
 public interface IRedisDb : IDisposable
 {
-    public Task<bool> VerifyUserToken(string token); // 토큰 검증하기
-    public Task<CSCommon.ErrorCode> RegisterAuthToken(string email, string token);
+  
+    public Task<CSCommon.ErrorCode> AddAuthToken(string email, string token); // 토큰 추가하기
 
-    public Task<Tuple<CSCommon.ErrorCode, String>> GetUserToken(string email);
+    public Task<bool> CheckAuthTokenExist(string token);
 }

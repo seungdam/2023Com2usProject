@@ -30,6 +30,6 @@ public class LoginAccountRes
 {
 
     public String AuthToken { get; set; }
-    public CSCommon.ErrorCode Result { get; set; }
+    public CSCommon.ErrorCode ErrorCode { get; set; }
 
 }

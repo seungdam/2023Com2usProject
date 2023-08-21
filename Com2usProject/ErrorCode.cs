@@ -12,6 +12,8 @@ namespace CSCommon;
     LoginErrorInvalidPassword,
     LoginErrorException,
 
+    RedisErrorFailToAddToken,
+    RedisErrorTokenNoExist,
     RedisErrorException,
 
  }

@@ -4,6 +4,8 @@ using StackExchange.Redis;
 using CloudStructures;
 using CloudStructures.Structures;
 using CSCommon;
+using System.ComponentModel.DataAnnotations;
+using ZLogger;
 
 namespace Com2usProject.Service;
 
@@ -21,19 +23,36 @@ public class RedisDb : IRedisDb
         _rConn = new RedisConnection(_rConfig);
 
     }
-   public async Task<bool> VerifyUserToken(string token)
+   public async Task<bool> CheckAuthTokenExist(string token)
     {
 
-        return false;
+        try
+        {
+            var redisQuery = new RedisList<string>(_rConn, token, null);
+            var result = await redisQuery.ExistsAsync(); // 토큰이 존재하는가?
+            if (!result) return true;
+        }
+        catch(Exception e)
+        {
+
+            _logger.ZLogError("Something Error Occur. Plz Check This Code");
+            return false;
+        }
+        
+        return true;
     }
 
+    
 
-    public async Task<CSCommon.ErrorCode> RegisterAuthToken(string email, string token)
+    public async Task<CSCommon.ErrorCode> AddAuthToken(string email, string token)
     {
         try
         {
-            var redis = new RedisString<string>(_rConn, email, TimeSpan.FromMinutes(15));
-            await redis.SetAsync(token);
+            // 발급받은 토큰은 Token이라는 키를 가지는 String 자료형 통해 관리하도록 한다.
+            var redisQuery = new RedisString<string>(_rConn, token, null);
+            var result = await redisQuery.SetAsync(email); // LPush Method를 사용해서 등록
+
+            if (!result) return CSCommon.ErrorCode.RedisErrorFailToAddToken;
         }
         catch (Exception e)
         {
@@ -46,15 +65,7 @@ public class RedisDb : IRedisDb
     }
 
 
-    public async Task<Tuple<CSCommon.ErrorCode, String>> GetUserToken(string email)
-    {
-        var query = new RedisString<String>(_rConn, email, null); // email key에 해당하는 쿼리 생성
-        var token = await query.GetAsync();
-
-        var result = new Tuple<CSCommon.ErrorCode, String>(CSCommon.ErrorCode.ErrorNone,token.Value);
-
-        return result; 
-    }
+    
     public void Dispose()
     {
         _rConn.GetConnection().Close();
