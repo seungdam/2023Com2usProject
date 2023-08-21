@@ -4,21 +4,21 @@ using System.Net;
 
 namespace Com2usProject.MiddleWare;
 
-public class TokenVerifier
+public class MiddlewareTokenVerifier
 {
     readonly RequestDelegate _next;
     readonly IRedisDb _redisDb;
-    readonly ILogger<TokenVerifier> _logger;
+    readonly ILogger<MiddlewareTokenVerifier> _logger;
     string UserTocken = "AuthToken";
 
-    public TokenVerifier(RequestDelegate next, IRedisDb redisDb, ILogger<TokenVerifier> logger)
+    public MiddlewareTokenVerifier(RequestDelegate next, IRedisDb redisDb, ILogger<MiddlewareTokenVerifier> logger)
     {
         _next = next;
         _redisDb = redisDb;
         _logger = logger;
     }
 
-    public async Task CheckUserTokenAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context)
     {
 
         try
@@ -30,8 +30,8 @@ public class TokenVerifier
             }
             else
             {
-                var Token = context.Request.Headers["AuthToken"];
-                var result = await _redisDb.VerifyUserToken(Token);
+                var token = context.Request.Form["AuthToken"];
+                var result = await _redisDb.CheckAuthTokenExist(token);
                 if (!result) context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; // error code 발생
             }
         }

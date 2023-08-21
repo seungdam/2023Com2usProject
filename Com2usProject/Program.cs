@@ -33,7 +33,7 @@ if (app.Environment.IsDevelopment())
 
 }
 
-app.UseMiddleware<TokenVerifier>();
+app.UseMiddleware<MiddlewareTokenVerifier>();
 app.MapControllers();
 
 app.Run();

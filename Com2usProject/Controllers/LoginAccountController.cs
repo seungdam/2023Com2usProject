@@ -31,26 +31,36 @@ public class LoginAccountController : ControllerBase
         LoginAccountRes response = new LoginAccountRes();
         try
         {
-            var resultValue = await _accountDb.VerifyAccount(request.Email, request.Password);
-            if (resultValue == CSCommon.ErrorCode.ErrorNone)
+            var verifyResult = await _accountDb.VerifyAccount(request.Email, request.Password);
+            
+            if (verifyResult == CSCommon.ErrorCode.ErrorNone)
             {
                 var rngCsp = new RNGCryptoServiceProvider();
                 byte[] Token = new byte[20];
 
                 rngCsp.GetNonZeroBytes(Token);
                 response.AuthToken = request.Password + Convert.ToBase64String(Token);
-                response.Result = resultValue;
                 rngCsp.Dispose();
+
+                var addTokenReult = await _redisTokenDb.AddAuthToken(response.AuthToken, request.Email);
+                
+                if(addTokenReult != CSCommon.ErrorCode.ErrorNone)
+                {
+                    response.AuthToken = "None";
+                    response.ErrorCode = addTokenReult;
+                }
+                
+               
             }
             else
             {
                 response.AuthToken = "None";
-                response.Result = resultValue;
+                response.ErrorCode = verifyResult;
             }
         }
         catch (Exception ex)
         {
-            
+            _logger.ZLogError("Something Error Occur. Plz Check This Code.");   
         }
         return response;
     }
