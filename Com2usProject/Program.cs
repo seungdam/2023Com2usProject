@@ -1,3 +1,4 @@
+using Com2usProject.MiddleWare;
 using Com2usProject.Service;
 using Microsoft.AspNetCore.Builder;
 using ZLogger;
@@ -18,6 +19,7 @@ builder.Host.ConfigureLogging(logging =>
 // Add services to the container.
 
 builder.Services.AddTransient<IAccountDb, MySqlAccountDb>();
+builder.Services.AddSingleton<IRedisDb, RedisDb>();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
@@ -31,6 +33,7 @@ if (app.Environment.IsDevelopment())
 
 }
 
+app.UseMiddleware<TokenVerifier>();
 app.MapControllers();
 
 app.Run();

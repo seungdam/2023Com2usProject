@@ -10,6 +10,9 @@ namespace CSCommon;
     LoginErrorNoExist,
     LoginErrorAlreadyEnter,
     LoginErrorInvalidPassword,
-    LoginErrorException
+    LoginErrorException,
+
+    RedisErrorException,
+
  }
 
