@@ -3,14 +3,19 @@ using System.Text.Json.Nodes;
 
 namespace Com2usProject.ReqResModel;
 
-public class LoadCharacterDataReq : BaseReqRes
+
+public class LoadPlayerDataReq
 {
-    public String Id { get; set; }
+    public String AuthToken;
+    public int    PlayerId;
 }
 
-
-// 모든 데이터는 JSon형태로 저장되도록 한다.
-public class LoadCharacterDataRes
+public class LoadPlayerInventoryDataRes
 {
-  public CharacterModel charData { get; set; }
+    InventoryInfo InventoryInfo;
+}
+
+public class LoadPlayerMailDataRes
+{
+    InventoryInfo InventoryInfo;
 }
