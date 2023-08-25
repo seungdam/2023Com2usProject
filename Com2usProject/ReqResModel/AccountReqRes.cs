@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Com2usProject.DataModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Com2usProject.ReqResModel;
 
@@ -29,7 +30,7 @@ public class LoginAccountRes
 
     public String AuthToken { get; set; }
 
-    public String Id { get; set; }
+   public PlayerInfo[] PlayerInfos { get; set; }
     public CSCommon.ErrorCode ErrorCode { get; set; }
 
 }
