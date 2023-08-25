@@ -1,5 +1,5 @@
 using Com2usProject.MiddleWare;
-using Com2usProject.Service;
+using Com2usProject.Repository;
 using Microsoft.AspNetCore.Builder;
 using ZLogger;
 
@@ -18,22 +18,14 @@ builder.Host.ConfigureLogging(logging =>
 
 // Add services to the container.
 
-builder.Services.AddTransient<IAccountDb, MySqlAccountDb>();
+builder.Services.AddTransient<IAccountDb, AccountRepository>();
+builder.Services.AddTransient<IInGameDb, InGameRepository>();
 builder.Services.AddSingleton<IRedisDb, RedisDb>();
 builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
-
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
-}
-
 app.UseMiddleware<MiddleWareTokenVerifier>();
 app.MapControllers();
 
-app.Run();
+app.Run(appConfig["ServerAddress"]);

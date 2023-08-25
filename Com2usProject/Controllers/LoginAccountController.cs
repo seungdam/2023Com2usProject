@@ -1,5 +1,5 @@
 ﻿using Com2usProject.ReqResModel;
-using Com2usProject.Service;
+using Com2usProject.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
@@ -11,53 +11,50 @@ namespace Com2usProject.Controllers;
 
 
 [ApiController]
-[Route("login/[controller]")]
+[Route("api/[controller]")]
 public class LoginAccountController : ControllerBase
 {
     readonly IAccountDb _accountDb;
+    readonly IInGameDb _inGameDb;
     readonly IRedisDb _redisTokenDb;
     readonly ILogger<LoginAccountController> _logger;
     
 
-    public LoginAccountController(ILogger<LoginAccountController> logger, IAccountDb accountDb, IRedisDb redisDb)
+    public LoginAccountController(ILogger<LoginAccountController> logger, IAccountDb accountDb, IInGameDb inGameDb,IRedisDb redisDb)
     {
         _logger = logger;
         _accountDb = accountDb;
         _redisTokenDb = redisDb;
+        _inGameDb = inGameDb;
     }
 
-    [HttpPost]
+    [HttpPost("/Login")]
     public async Task<LoginAccountRes> Login(AccountReq request)
     {
         LoginAccountRes response = new LoginAccountRes();
         try
         {
             var verifyResult = await _accountDb.VerifyAccount(request.Email, request.Password);
-            
-            if (verifyResult.Item1 == CSCommon.ErrorCode.ErrorNone)
+
+            if (verifyResult == CSCommon.ErrorCode.ErrorNone)
             {
-                var rngCsp = new RNGCryptoServiceProvider();
-                byte[] Token = new byte[20];
 
-                rngCsp.GetNonZeroBytes(Token);
-                response.AuthToken = request.Password + Convert.ToBase64String(Token);
-                response.Id = verifyResult.Item2;
+                response.AuthToken = CreateAuthToken(request.Password);
+                var registerTokenReult = await _redisTokenDb.RegisterAuthToken(request.Email, response.AuthToken);
+                var playerListResult = await _inGameDb.LoadPlayerInfoData(request.Email);
 
-                rngCsp.Dispose();
-
-                var addTokenReult = await _redisTokenDb.AddAuthToken(response.AuthToken, request.Email);
-                
-                if(addTokenReult != CSCommon.ErrorCode.ErrorNone)
+                if(playerListResult.errorCode == CSCommon.ErrorCode.ErrorNone)
                 {
-                    response.AuthToken = "None";
-                    response.ErrorCode = addTokenReult;
-                   
+                    response.PlayerInfos = playerListResult.playerDatas;
                 }
+                foreach(var i in response.PlayerInfos)
+                    _logger.ZLogInformation($"Player Id : {i.PlayerId} Class : { i.Class} Level : {i.Level}" );
             }
             else
             {
+                
                 response.AuthToken = "None";
-                response.ErrorCode = verifyResult.Item1;
+                response.ErrorCode = verifyResult;
             }
         }
         catch (Exception ex)
@@ -65,5 +62,17 @@ public class LoginAccountController : ControllerBase
             _logger.ZLogError("Something Error Occur. Plz Check This Code.");   
         }
         return response;
+    }
+
+
+    public String CreateAuthToken(String Password)
+    {
+        var rngCsp = new RNGCryptoServiceProvider();
+        byte[] Token = new byte[20];
+        rngCsp.GetNonZeroBytes(Token);
+        String NewAuthToken = Password + Convert.ToBase64String(Token);
+        rngCsp.Dispose();
+
+       return NewAuthToken;
     }
 }
