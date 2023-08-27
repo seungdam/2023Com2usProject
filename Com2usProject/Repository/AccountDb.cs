@@ -7,7 +7,7 @@ using SqlKata.Execution;
 using StackExchange.Redis;
 using System.Data;
 using ZLogger;
-using Com2usProject.Service;
+using Com2usProject.AccountSecurity;
 
 namespace Com2usProject.Repository;
 
@@ -18,9 +18,9 @@ public class DbConnectionStrings
     public string RedisDb { get; set; }
 }
 
-public class AccountRepository : IAccountDb // 해당 Account 클래스는 MySql을 사용하므로 클래스명을 MySqlAccountDb라고 짓는다
+public class AccountDb : IAccountDb // 해당 Account 클래스는 MySql을 사용하므로 클래스명을 MySqlAccountDb라고 짓는다
 {
-    readonly ILogger<AccountRepository> _logger;
+    readonly ILogger<AccountDb> _logger;
     readonly IRedisDb _redisDb;
     readonly IOptions<DbConnectionStrings> _dbConfig;
 
@@ -32,7 +32,7 @@ public class AccountRepository : IAccountDb // 해당 Account 클래스는 MySql
     
     
     
-    public AccountRepository(ILogger<AccountRepository> logger, IOptions<DbConnectionStrings> dbconfig)
+    public AccountDb(ILogger<AccountDb> logger, IOptions<DbConnectionStrings> dbconfig)
     {
         _logger = logger;
         _dbConfig = dbconfig;
@@ -91,7 +91,7 @@ public class AccountRepository : IAccountDb // 해당 Account 클래스는 MySql
         }
 
 
-        var LoginData = await _mySqlQueryFactory.Query("accountinfo").Where("Email", email).FirstOrDefaultAsync<AccountInfo>();
+        var LoginData = await _mySqlQueryFactory.Query("accountinfo").Where("Email", email).FirstAsync<AccountInfo>();
 
         if(_pwhasher.VerifyPassword(pw, LoginData.HashPassword)) // 만약 해시 검증에 성공했다면 토큰을 부여하고 
         {

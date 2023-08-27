@@ -1,4 +1,4 @@
-﻿namespace Com2usProject.Service;
+﻿namespace Com2usProject.Repository;
 
 public interface IMail
 {
