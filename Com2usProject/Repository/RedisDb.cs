@@ -25,7 +25,7 @@ public class RedisDb : IRedisDb
             _redisConfig = new RedisConfig("AuthTokenRedisDb", dbconfig.Value.RedisDb);
             _redisConn = new RedisConnection(_redisConfig);
         }
-        catch (Exception ex)
+        catch
         {
             _logger.ZLogError("Redis Conn Error");
         }
@@ -42,7 +42,7 @@ public class RedisDb : IRedisDb
             else return false;
             
         }
-        catch(Exception e)
+        catch
         {
 
             _logger.ZLogError("Something Error Occur At CheckAuthToken. Plz Check This Code");
@@ -61,7 +61,7 @@ public class RedisDb : IRedisDb
 
             if (!result) return CSCommon.ErrorCode.RedisErrorFailToAddToken;
         }
-        catch (Exception e)
+        catch
         {
 
 
@@ -73,7 +73,7 @@ public class RedisDb : IRedisDb
         return CSCommon.ErrorCode.ErrorNone;
     }
 
-    public RedisConnection GetConnection() {  return _redisConn; }
+    public RedisConnection GetConnection() { return _redisConn; }
     public void Dispose()
     {
         _redisConn.GetConnection().Close();

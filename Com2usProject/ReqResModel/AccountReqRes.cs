@@ -30,7 +30,7 @@ public class LoginAccountRes
 
     public String AuthToken { get; set; }
 
-   public PlayerInfo[] PlayerInfos { get; set; }
+   public PlayerInfo[]? PlayerInfos { get; set; }
     public CSCommon.ErrorCode ErrorCode { get; set; }
 
 }

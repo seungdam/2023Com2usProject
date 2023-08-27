@@ -45,12 +45,12 @@ public class LoginAccountController : ControllerBase
              
                 var playerListResult = await _inGameDb.LoadPlayerInfoData(request.Email);
 
-                if(playerListResult.errorCode == CSCommon.ErrorCode.ErrorNone)
+                if(playerListResult.ErrorCode == CSCommon.ErrorCode.ErrorNone)
                 {
-                    response.PlayerInfos = playerListResult.playerDatas;
+                    response.PlayerInfos = playerListResult.playerInfos;
                 }
 
-                foreach(var i in response.PlayerInfos) _logger.ZLogInformation($"[Login Success] Player Id : {i.PlayerId} Class : { i.Class} Level : {i.Level}" );
+                if(response.PlayerInfos is not null) foreach(var i in response.PlayerInfos) _logger.ZLogInformation($"[Login Success] Player Id : {i.PlayerId} Class : { i.Class} Level : {i.Level}" );
             }
             else
             {
@@ -59,7 +59,7 @@ public class LoginAccountController : ControllerBase
                 response.ErrorCode = verifyResult;
             }
         }
-        catch (Exception ex)
+        catch
         {
             _logger.ZLogError("Something Error Occur. Plz Check This Code.");   
         }

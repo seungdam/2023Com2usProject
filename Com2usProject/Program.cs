@@ -18,8 +18,8 @@ builder.Host.ConfigureLogging(logging =>
 
 // Add services to the container.
 
-builder.Services.AddTransient<IAccountDb, AccountRepository>();
-builder.Services.AddTransient<IInGameDb, InGameRepository>();
+builder.Services.AddTransient<IAccountDb, AccountDb>();
+builder.Services.AddTransient<IInGameDb, InGameDb>();
 builder.Services.AddSingleton<IRedisDb, RedisDb>();
 builder.Services.AddControllers();
 

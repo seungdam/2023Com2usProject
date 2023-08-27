@@ -16,9 +16,9 @@ namespace CSCommon;
     RedisErrorTokenNoExist,
     RedisErrorException,
 
-    LoadCharacterErrorNoExist,
-    LoadCharacterErrorException,
-    LoadCharacterErrorInvaildId,
+    LoadPlayerDataErrorNoExist,
+    LoadPlayerDataErrorException,
+    LoadPlayerDataErrorInvaildId,
 
  }
 

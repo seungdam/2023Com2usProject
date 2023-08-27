@@ -10,12 +10,18 @@ public class LoadPlayerDataReq
     public int    PlayerId { get; set; }
 }
 
+
+
 public class LoadPlayerInventoryDataRes
 {
-    InventoryInfo InventoryInfo;
+    public String InventoryInfos { get; set; } 
+    public CSCommon.ErrorCode ErrorCode { get; set; }
 }
+
+
 
 public class LoadPlayerMailDataRes
 {
-    InventoryInfo InventoryInfo;
+    public String MailInfos { get; set; }
+    public CSCommon.ErrorCode ErrorCode { get; set; }
 }
