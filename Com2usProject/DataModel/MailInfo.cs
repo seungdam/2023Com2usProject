@@ -1,6 +1,6 @@
 ﻿namespace Com2usProject.DataModel;
 
-public class MainInfo
+public class MailInfo
 {
     public int index;
     public int ItemCode;
