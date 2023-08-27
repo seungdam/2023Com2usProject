@@ -13,7 +13,9 @@ public class RedisDb : IRedisDb
     readonly ILogger<RedisDb> _logger;
     readonly IOptions<DbConnectionStrings> _dbConfig;
     RedisConnection _redisConn;
+    RedisConnection _redisGameConn;
     RedisConfig _redisConfig;
+    RedisConfig _redisGameConfig;
 
     public RedisDb(ILogger<RedisDb> logger, IOptions<DbConnectionStrings> dbconfig)
     {
@@ -24,6 +26,10 @@ public class RedisDb : IRedisDb
         {
             _redisConfig = new RedisConfig("AuthTokenRedisDb", dbconfig.Value.RedisDb);
             _redisConn = new RedisConnection(_redisConfig);
+
+            _redisGameConfig = new RedisConfig("GameRedisDb", dbconfig.Value.RedisGameDb);
+            _redisGameConn = new RedisConnection(_redisGameConfig);
+
         }
         catch
         {
@@ -73,7 +79,7 @@ public class RedisDb : IRedisDb
         return CSCommon.ErrorCode.ErrorNone;
     }
 
-    public RedisConnection GetConnection() { return _redisConn; }
+    public RedisConnection GetConnection() { return _redisGameConn; }
     public void Dispose()
     {
         _redisConn.GetConnection().Close();
