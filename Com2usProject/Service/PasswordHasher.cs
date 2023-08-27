@@ -4,16 +4,16 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 
-namespace Com2usProject.SecurityUtil;
+namespace Com2usProject.Service;
 
 public sealed class MyPasswordHasher
 {
     int _saltBytesSize = 16;
     int _hashBytesSize = 32;
-    
+
     public MyPasswordHasher()
     {
-       
+
     }
     // Salt와 Digest 방법을 혼용해서 사용하자
     public string HashingPassword(string password)
@@ -45,12 +45,12 @@ public sealed class MyPasswordHasher
     {
         // 데이터베이스에서 해시 패스워드 값을 받아와 이를 저장할 예정
         byte[] hashBytes = Convert.FromBase64String(hashPassword);
-        
+
         byte[] restoreSaltValue = new byte[_saltBytesSize];
         byte[] restoreHashValue = new byte[_hashBytesSize];
 
         Array.Copy(hashBytes, 0, restoreSaltValue, 0, _saltBytesSize);
-        Array.Copy(hashBytes, _saltBytesSize, restoreHashValue,0, _hashBytesSize);
+        Array.Copy(hashBytes, _saltBytesSize, restoreHashValue, 0, _hashBytesSize);
 
         byte[] compareHashedValue = KeyDerivation.Pbkdf2(
             password: password,
@@ -63,5 +63,5 @@ public sealed class MyPasswordHasher
 
     }
 
-  
+
 }

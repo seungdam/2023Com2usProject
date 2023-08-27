@@ -1,5 +1,4 @@
 ﻿using Com2usProject.DataModel;
-using Com2usProject.SecurityUtil;
 using CSCommon;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
@@ -8,9 +7,7 @@ using SqlKata.Execution;
 using StackExchange.Redis;
 using System.Data;
 using ZLogger;
-
-
-
+using Com2usProject.Service;
 
 namespace Com2usProject.Repository;
 
@@ -18,7 +15,7 @@ namespace Com2usProject.Repository;
 public class DbConnectionStrings
 {
     public string MySqlGameDb { get; set; }
-    public string RedisTockenDb { get; set; }
+    public string RedisDb { get; set; }
 }
 
 public class AccountRepository : IAccountDb // 해당 Account 클래스는 MySql을 사용하므로 클래스명을 MySqlAccountDb라고 짓는다
@@ -58,9 +55,10 @@ public class AccountRepository : IAccountDb // 해당 Account 클래스는 MySql
     {
         
         var existAccountInfo = await _mySqlQueryFactory.Query("accountinfo").Where("Email", email).ExistsAsync();
+       
         if (existAccountInfo)
         {
-            _logger.ZLogError($"[RegisterAccount] ErrorCode: {CSCommon.ErrorCode.RegisterErrorAlreadyExist}, Email: {email} \n");
+            _logger.ZLogError($"[AccountRepository.RegisterAccount] ErrorCode: {CSCommon.ErrorCode.RegisterErrorAlreadyExist}, Email: {email} \n");
             return CSCommon.ErrorCode.RegisterErrorAlreadyExist;
 
         }
@@ -76,7 +74,7 @@ public class AccountRepository : IAccountDb // 해당 Account 클래스는 MySql
         
         if (count != 1)
         {
-            _logger.ZLogError($"[AccountDb.CreateAccount] ErrorCode: {CSCommon.ErrorCode.RegisterErrorFailToInsert}, Email: {email} \n");
+            _logger.ZLogError($"[AccountRepository.CreateAccount] ErrorCode: {CSCommon.ErrorCode.RegisterErrorFailToInsert}, Email: {email} \n");
             return CSCommon.ErrorCode.RegisterErrorFailToInsert;
         }
        
@@ -88,7 +86,7 @@ public class AccountRepository : IAccountDb // 해당 Account 클래스는 MySql
         var isAccountExist = await _mySqlQueryFactory.Query("accountinfo").Where("Email", email).ExistsAsync();
         if (!isAccountExist)
         {
-            _logger.ZLogError($"[AccountDb.VerifyAccount] ErrorCode: {CSCommon.ErrorCode.RegisterErrorFailToInsert}\n");
+            _logger.ZLogError($"[AccountRepository.VerifyAccount] ErrorCode: {CSCommon.ErrorCode.LoginErrorNoExist}\n");
             return CSCommon.ErrorCode.LoginErrorNoExist;
         }
 
@@ -101,7 +99,7 @@ public class AccountRepository : IAccountDb // 해당 Account 클래스는 MySql
         }
         else
         {
-            _logger.ZLogError($"[RegisterAccount] ErrorCode: {CSCommon.ErrorCode.LoginErrorInvalidPassword}, Email: {email} \n");
+            _logger.ZLogError($"[AccountRepository.VerifyAccount] ErrorCode: {CSCommon.ErrorCode.LoginErrorInvalidPassword}, Email: {email} \n");
             return CSCommon.ErrorCode.LoginErrorInvalidPassword;
         }
     }

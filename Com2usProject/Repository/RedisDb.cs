@@ -12,8 +12,9 @@ public class RedisDb : IRedisDb
 {
     readonly ILogger<RedisDb> _logger;
     readonly IOptions<DbConnectionStrings> _dbConfig;
-    RedisConnection _rConn;
-    RedisConfig _rConfig;
+    RedisConnection _redisConn;
+    RedisConfig _redisConfig;
+
     public RedisDb(ILogger<RedisDb> logger, IOptions<DbConnectionStrings> dbconfig)
     {
         _logger = logger;
@@ -21,8 +22,8 @@ public class RedisDb : IRedisDb
 
         try
         {
-            _rConfig = new RedisConfig("AuthTokenRedisDb", dbconfig.Value.RedisTockenDb);
-            _rConn = new RedisConnection(_rConfig);
+            _redisConfig = new RedisConfig("AuthTokenRedisDb", dbconfig.Value.RedisDb);
+            _redisConn = new RedisConnection(_redisConfig);
         }
         catch (Exception ex)
         {
@@ -30,12 +31,12 @@ public class RedisDb : IRedisDb
         }
     }
 
-   public async Task<bool> CheckAuthTokenExist(string token)
+    public async Task<bool> CheckAuthTokenExist(string token)
     {
 
         try
         {
-            var redisQuery = new RedisString<string>(_rConn, token, null);
+            var redisQuery = new RedisString<string>(_redisConn, token, null);
             var result = await redisQuery.ExistsAsync(); // 토큰이 존재하는가?
             if (!result) return true;
             else return false;
@@ -55,7 +56,7 @@ public class RedisDb : IRedisDb
         try
         {
            
-            var redisQuery = new RedisString<string>(_rConn, token, null);
+            var redisQuery = new RedisString<string>(_redisConn, token, null);
             var result = await redisQuery.SetAsync(email); // 
 
             if (!result) return CSCommon.ErrorCode.RedisErrorFailToAddToken;
@@ -72,10 +73,9 @@ public class RedisDb : IRedisDb
         return CSCommon.ErrorCode.ErrorNone;
     }
 
-
-    
+    public RedisConnection GetConnection() {  return _redisConn; }
     public void Dispose()
     {
-        _rConn.GetConnection().Close();
+        _redisConn.GetConnection().Close();
     }
 }

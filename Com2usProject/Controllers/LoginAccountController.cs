@@ -41,14 +41,16 @@ public class LoginAccountController : ControllerBase
 
                 response.AuthToken = CreateAuthToken(request.Password);
                 var registerTokenReult = await _redisTokenDb.RegisterAuthToken(request.Email, response.AuthToken);
+                
+             
                 var playerListResult = await _inGameDb.LoadPlayerInfoData(request.Email);
 
                 if(playerListResult.errorCode == CSCommon.ErrorCode.ErrorNone)
                 {
                     response.PlayerInfos = playerListResult.playerDatas;
                 }
-                foreach(var i in response.PlayerInfos)
-                    _logger.ZLogInformation($"Player Id : {i.PlayerId} Class : { i.Class} Level : {i.Level}" );
+
+                foreach(var i in response.PlayerInfos) _logger.ZLogInformation($"[Login Success] Player Id : {i.PlayerId} Class : { i.Class} Level : {i.Level}" );
             }
             else
             {

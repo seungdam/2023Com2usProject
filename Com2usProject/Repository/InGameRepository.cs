@@ -1,11 +1,13 @@
 ﻿using Com2usProject.DataModel;
-using Com2usProject.SecurityUtil;
+using Com2usProject.AccountSecurity;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 using SqlKata.Compilers;
 using SqlKata.Execution;
 using System;
 using System.Data;
+using ZLogger;
+using CloudStructures.Structures;
 
 namespace Com2usProject.Repository;
 
@@ -41,6 +43,7 @@ public class InGameRepository : IInGameDb
         var InventoryDatas = await _mySqlQueryFactory.Query("inventoryinfo").Select("Index", "ItemCode", "Count").Where("PlayerId", ReqPlayerId).Limit(9).GetAsync<InventoryInfo>();
         if (InventoryDatas is not null)
         {
+            var redisInventoryList = RedisList<int>();
             return (errorCode : CSCommon.ErrorCode.ErrorNone, InventoryDatas.ToArray());
         }
         else
@@ -52,18 +55,26 @@ public class InGameRepository : IInGameDb
     public async Task<(CSCommon.ErrorCode errorCode, PlayerInfo[] playerDatas)> LoadPlayerInfoData(String email)
     {
         var bIsPlayerInfoExist = await _mySqlQueryFactory.Query("playerinfo").Where("PlayerEmail", email).ExistsAsync();
-        
-        if(bIsPlayerInfoExist)
-        {
-           var LoadedplayerDatas =  await _mySqlQueryFactory.Query("playerinfo").Select("PlayerId","Class", "Level").Where("PlayerEmail",email).GetAsync<PlayerInfo>();
 
-            return (errorCode: CSCommon.ErrorCode.ErrorNone, playerDatas: LoadedplayerDatas.ToArray());
-        }
-        else
+        try
         {
-            return (errorCode: CSCommon.ErrorCode.ErrorNone, playerDatas: new [] { new PlayerInfo() {PlayerId = -1, Level = 0, Class= "None" } });
+            if (bIsPlayerInfoExist)
+            {
+                var LoadedplayerDatas = await _mySqlQueryFactory.Query("playerinfo").Select("PlayerId", "Class", "Level").Where("PlayerEmail", email).GetAsync<PlayerInfo>();
+                return (errorCode: CSCommon.ErrorCode.ErrorNone, playerDatas: LoadedplayerDatas.ToArray());
+            }
+            else
+            {
+                return (errorCode: CSCommon.ErrorCode.ErrorNone, playerDatas: new[] { new PlayerInfo() { PlayerId = -1, Level = 0, Class = "None" } });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError($"[InGameRepository.LoadPlayerInfoData] ErrorCode: {CSCommon.ErrorCode.LoadCharacterErrorException}");
+            return (errorCode: CSCommon.ErrorCode.ErrorNone, playerDatas: new[] { new PlayerInfo() { PlayerId = -1, Level = 0, Class = "None" } });
         }
     }
+
     public void Dispose()
     {
         _mySqlDbConnection.Close();

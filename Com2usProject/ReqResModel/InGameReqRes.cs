@@ -6,8 +6,8 @@ namespace Com2usProject.ReqResModel;
 
 public class LoadPlayerDataReq
 {
-    public String AuthToken;
-    public int    PlayerId;
+    public String AuthToken { get; set; }
+    public int    PlayerId { get; set; }
 }
 
 public class LoadPlayerInventoryDataRes
