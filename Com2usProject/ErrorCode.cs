@@ -22,7 +22,10 @@ namespace CSCommon;
 
     InventoryErrorAddItemException,
     InventoryErrorUseOrDropItemException,
-
+    InventoryErrorIncItem,
+    InventoryErrorDecItem,
+    InventoryErrorInsItem,
+    InventoryErrorDelItem,
 
     MailBoxReciveMailError,
     MailBoxSendMailError,

@@ -1,4 +1,5 @@
 ﻿using Com2usProject.DataModel;
+using CSCommon;
 
 namespace Com2usProject.ServiceInterface;
 public interface IPlayerMailBoxData

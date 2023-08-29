@@ -2,7 +2,7 @@
 
 public class MailInfo
 {
-    public int index;
+    public int MailIndex;
     public int ItemCode;
     public int ItemCount;
     public double RecivedTime;

@@ -9,12 +9,12 @@ using ZLogger;
 
 namespace Com2usProject.Service;
 
-public class HandlePlayerInventoryData: IPlayerInventoryData
+public class HandleInventoryData: IPlayerInventoryData
 {
     readonly IInGameDb _gameDb;
-    readonly ILogger<HandlePlayableCharacterStatusData> _logger;
+    readonly ILogger<HandleCharacterStatusData> _logger;
 
-    HandlePlayerInventoryData(IInGameDb gameDb, ILogger<HandlePlayableCharacterStatusData> logger)
+    public HandleInventoryData(IInGameDb gameDb, ILogger<HandleCharacterStatusData> logger)
     {
         _gameDb = gameDb;
         _logger = logger;
@@ -37,11 +37,11 @@ public class HandlePlayerInventoryData: IPlayerInventoryData
                 }
             );
 
-            if (count != 1) _logger.ZLogDebug("Insert Item Fail");
+            if (count != 1) _logger.ZLogDebug($"[HandleInventory.InsertNewItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorInsItem}");
         }
        catch
         {
-            _logger.ZLogError("Insert Exception Occur");
+            _logger.ZLogError($"[HandleInventory.InsertNewItem] ErrorCode : Insert Exception Occur");
         }
       
     }
@@ -57,11 +57,11 @@ public class HandlePlayerInventoryData: IPlayerInventoryData
                 .IncrementAsync("Count", IncreaseValue);
 
 
-            if (count != 1) _logger.ZLogDebug("Decrease Item Fail");
+            if (count != 1) _logger.ZLogDebug($"[HandleInventory.IncreaseItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorIncItem}");
         }
         catch
         {
-            _logger.ZLogError("DeCrease Exception Occur");
+            _logger.ZLogError("[HandleInventory.IncreaseItem] Error : DeCrease Exception Occur");
         }
         
     }
@@ -77,11 +77,12 @@ public class HandlePlayerInventoryData: IPlayerInventoryData
                .DecrementAsync("Count", DecreaseValue);
 
 
-            if (count != 1) _logger.ZLogDebug("Decrease Item Fail");
+            if (count != 1) _logger.ZLogDebug($"[HandleInventory.DecreaseItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorDecItem}");
+     
         }
         catch
         {
-            _logger.ZLogError("DeCrease Exception Occur");
+            _logger.ZLogError("[HandleInventory.IncreaseItem] Error : DeCrease Exception Occur");
         }
        
     }
@@ -96,11 +97,11 @@ public class HandlePlayerInventoryData: IPlayerInventoryData
              .Where("InventoryIndex", InventoryIndex)
              .DeleteAsync();
 
-            if (count != 1) _logger.ZLogDebug("Del Item Fail");
+            if (count != 1) _logger.ZLogDebug($"[HandleInventory.IncreaseItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorDelItem}");
         }
         catch 
         {
-            _logger.ZLogError("DelItem Exception Occur");
+            _logger.ZLogError("[HandleInventory.DelItem] Error: DelItem Exception Occur");
 
         }
 

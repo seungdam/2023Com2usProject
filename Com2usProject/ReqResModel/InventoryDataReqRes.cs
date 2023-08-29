@@ -8,17 +8,15 @@ public class LoadPlayerInventoryDataReq : BaseGameDataReq
     public int InventoryPage { get; set; }
 }
 
-public class LoadPlayerMailBoxDataReq : BaseGameDataReq
-{
-    public int MailBoxPage { get; set; }
-}
+
 
 public class LoadPlayerInventoryDataRes : BaseGameDataRes
 {
     public String InventoryInfos { get; set; } 
 }
 
-public class LoadPlayerMailBoxDataRes : BaseGameDataRes
+
+public class UpdateInventoryDataRes : BaseGameDataRes
 {
-    public String MailBoxInfos { get; set; }
+    public String InventoryInfo { get; set; }
 }

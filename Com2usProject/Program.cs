@@ -22,13 +22,13 @@ builder.Host.ConfigureLogging(logging =>
 
 builder.Services.AddTransient<IAccountDb, HandleAccount>();
 builder.Services.AddTransient<IInGameDb, InGameDb>();
-builder.Services.AddTransient<IPlayableCharacterStatusData, HandlePlayableCharacterStatusData>();
-builder.Services.AddTransient<IPlayerInventoryData, HandlePlayerInventoryData>();
+builder.Services.AddTransient<IPlayableCharacterStatusData, HandleCharacterStatusData>();
+builder.Services.AddTransient<IPlayerInventoryData, HandleInventoryData>();
+builder.Services.AddTransient<IPlayerMailBoxData, HandleMailBoxData>();
 builder.Services.AddSingleton<IRedisDb, RedisDb>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
-// Configure the HTTP request pipeline.
 app.UseMiddleware<MiddleWareTokenVerifier>();
 app.MapControllers();
 

@@ -30,24 +30,6 @@ public class HandleAccount : IAccountDb // 해당 Account 클래스는 MySql을 
     readonly IInGameDb _inGameDb;
     MyPasswordHasher _pwhasher;
 
-    //Compiler         _mySqlComplier;
-    //QueryFactory     _mySqlQueryFactory;
-    //IDbConnection    _mySqlDbConnection; //  IDbConnection 또한 한가지 DB에 국한된 것이 아닌 다양한 DBConnection을 사용할 수 있도록 하는 인터페이스이다.
-
-    //public AccountDb(ILogger<AccountDb> logger, IOptions<DbConnectionStrings> dbconfig)
-    //{
-    //    _logger = logger;
-    //    _dbConfig = dbconfig;
-
-    //    _mySqlDbConnection = new MySqlConnection(dbconfig.Value.MySqlGameDb);
-    //    _mySqlDbConnection.Open();
-
-
-    //    _mySqlComplier = new MySqlCompiler();
-    //    _mySqlQueryFactory =  new QueryFactory(_mySqlDbConnection,_mySqlComplier);
-    //    _pwhasher = new MyPasswordHasher();
-    //}
-
 
     public HandleAccount(ILogger<HandleAccount> logger, IInGameDb gameDb)
     {
@@ -56,11 +38,6 @@ public class HandleAccount : IAccountDb // 해당 Account 클래스는 MySql을 
         _pwhasher = new MyPasswordHasher();
     }
 
-    //public void Dispose()
-    //{ 
-    //    _mySqlDbConnection.Close();
-    //}
-
     public async Task<ErrorCode> RegisterAccount(string email, string pw)
     {
 
@@ -68,7 +45,7 @@ public class HandleAccount : IAccountDb // 해당 Account 클래스는 MySql을 
 
         if (existAccountInfo)
         {
-            _logger.ZLogError($"[AccountRepository.RegisterAccount] ErrorCode: {ErrorCode.RegisterErrorAlreadyExist}, Email: {email} \n");
+            _logger.ZLogError($"[HandleAccount.RegisterAccount] ErrorCode: {ErrorCode.RegisterErrorAlreadyExist}, Email: {email} \n");
             return ErrorCode.RegisterErrorAlreadyExist;
 
         }
@@ -84,7 +61,7 @@ public class HandleAccount : IAccountDb // 해당 Account 클래스는 MySql을 
 
         if (count != 1)
         {
-            _logger.ZLogError($"[AccountRepository.CreateAccount] ErrorCode: {ErrorCode.RegisterErrorFailToInsert}, Email: {email} \n");
+            _logger.ZLogError($"[HandleAccount.CreateAccount] ErrorCode: {ErrorCode.RegisterErrorFailToInsert}, Email: {email} \n");
             return ErrorCode.RegisterErrorFailToInsert;
         }
 

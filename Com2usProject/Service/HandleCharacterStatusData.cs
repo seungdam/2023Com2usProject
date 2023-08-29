@@ -9,12 +9,12 @@ namespace Com2usProject.Service;
 
 
 
-public class HandlePlayableCharacterStatusData : IPlayableCharacterStatusData 
+public class HandleCharacterStatusData : IPlayableCharacterStatusData 
 {
 
     readonly IInGameDb _gameDb;
-    readonly ILogger<HandlePlayableCharacterStatusData> _logger;
-    HandlePlayableCharacterStatusData(ILogger<HandlePlayableCharacterStatusData> logger, IInGameDb gameDb)
+    readonly ILogger<HandleCharacterStatusData> _logger;
+    public HandleCharacterStatusData(ILogger<HandleCharacterStatusData> logger, IInGameDb gameDb)
     {
         _gameDb = gameDb;
         _logger = logger;

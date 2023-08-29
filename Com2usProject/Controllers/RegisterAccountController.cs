@@ -14,8 +14,8 @@ namespace Com2usProject.Controllers;
 [Route("api/[controller]")]
 public  class RegisterAccountController : ControllerBase 
 {
-    private readonly IAccountDb _accountDb;
-    private readonly ILogger<RegisterAccountController> _logger;
+   readonly IAccountDb _accountDb;
+   readonly ILogger<RegisterAccountController> _logger;
 
     public RegisterAccountController(ILogger<RegisterAccountController> logger, IAccountDb accountDb)
     {

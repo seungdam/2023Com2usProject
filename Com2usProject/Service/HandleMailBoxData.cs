@@ -12,7 +12,7 @@ public class HandleMailBoxData : IPlayerMailBoxData
     readonly IPlayerInventoryData _inventoryHandler;
     readonly ILogger<HandleMailBoxData> _logger;
 
-    HandleMailBoxData(IInGameDb gameDb, ILogger<HandleMailBoxData> logger, IPlayerInventoryData piHandler)
+    public HandleMailBoxData(IInGameDb gameDb, ILogger<HandleMailBoxData> logger, IPlayerInventoryData piHandler)
     {
         _gameDb = gameDb;
         _logger = logger;
@@ -22,29 +22,43 @@ public class HandleMailBoxData : IPlayerMailBoxData
   
     public async Task<CSCommon.ErrorCode> DelMail(int PlayerId,int DelMailIndex)
     {
-        var result = await _gameDb.GetQueryFactory().Query("mailbox").Where("PlayerId",PlayerId).Where("MailIndex",DelMailIndex).DeleteAsync();
 
-        if (result != 1) return CSCommon.ErrorCode.MailBoxDeleteError;
-        else return CSCommon.ErrorCode.ErrorNone;
+        try
+        {
+            var result = await _gameDb.GetQueryFactory().Query("mailbox").Where("PlayerId", PlayerId).Where("MailIndex", DelMailIndex).DeleteAsync();
 
+            if (result != 1) return CSCommon.ErrorCode.MailBoxDeleteError;
+
+            else return CSCommon.ErrorCode.ErrorNone;
+        }
+        catch 
+        {
+            return CSCommon.ErrorCode.MailBoxDeleteError;
+        }
     }
     public async Task<CSCommon.ErrorCode> RecieveMail(int PlayerId, int RecvMailIndex)
     {
-        var mailInfo = await _gameDb.GetQueryFactory().Query("mailbox")
-                                   .Select("MailIndex", "ItemCode", "ItemCount", "RecievedTime", "ExpirationTime")
-                                   .Where("PlayerId", PlayerId)
-                                   .Where("Index", RecvMailIndex)
-                                   .FirstAsync<MailInfo>();
+        try
+        {
+            var mailInfo = await _gameDb.GetQueryFactory().Query("mailbox")
+                                       .Select("MailIndex", "ItemCode", "ItemCount", "RecievedTime", "ExpirationTime")
+                                       .Where("PlayerId", PlayerId)
+                                       .Where("Index", RecvMailIndex)
+                                       .FirstAsync<MailInfo>();
 
-        var handleResult = await _inventoryHandler.AddItemToInventory(PlayerId, mailInfo.ItemCode, mailInfo.ItemCount);
+            var handleResult = await _inventoryHandler.AddItemToInventory(PlayerId, mailInfo.ItemCode, mailInfo.ItemCount);
 
-        handleResult = await DelMail(PlayerId, RecvMailIndex);
+            handleResult = await DelMail(PlayerId, RecvMailIndex);
 
+            return handleResult;
+        }
+        catch
+        {
 
-        return handleResult;
-     
+            return CSCommon.ErrorCode.MailBoxReciveMailError;
+        }
+
     }
-
 
     public async Task<(CSCommon.ErrorCode ErrorCode, MailInfo[]? MailInfos)> LoadMail(int ReqPlayerId, int MailBoxPage)
     {
