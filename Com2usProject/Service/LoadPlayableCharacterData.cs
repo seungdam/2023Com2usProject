@@ -1,52 +1,35 @@
-﻿using Com2usProject.DataModel;
-using Com2usProject.AccountSecurity;
-using Microsoft.Extensions.Options;
-using MySqlConnector;
-using SqlKata.Compilers;
+
+using Com2usProject.DataModel;
+using Com2usProject.Repository;
 using SqlKata.Execution;
-using System;
-using System.Data;
 using ZLogger;
-using CloudStructures.Structures;
-using Newtonsoft.Json;
 
-namespace Com2usProject.Repository;
+namespace Com2usProject.Service;
 
-public class InGameDb : IInGameDb
+
+
+public class LoadPlayableCharacter : ILoadPlayerbleCharacterData 
 {
-    readonly ILogger<InGameDb> _logger;
-    readonly IRedisDb _redisDb;
-    readonly IOptions<DbConnectionStrings> _dbConfig;
 
-    Compiler _mySqlComplier;
-    QueryFactory _mySqlQueryFactory;
-    IDbConnection _mySqlDbConnection;
-
-
-    public InGameDb(ILogger<InGameDb> logger, IOptions<DbConnectionStrings> dbconfig, IRedisDb redisDb)
+    readonly IInGameDb _gameDb;
+    readonly ILogger<LoadPlayableCharacter> _logger;
+    LoadPlayableCharacter(ILogger<LoadPlayableCharacter> logger, IInGameDb gameDb)
     {
+        _gameDb = gameDb;
         _logger = logger;
-        _dbConfig = dbconfig;
-        _redisDb = redisDb;
-        _mySqlDbConnection = new MySqlConnection(dbconfig.Value.MySqlGameDb);
-        _mySqlDbConnection.Open();
-
-
-        _mySqlComplier = new MySqlCompiler();
-        _mySqlQueryFactory = new QueryFactory(_mySqlDbConnection, _mySqlComplier);
     }
 
-    public async Task<(CSCommon.ErrorCode ErrorCode, InventoryInfo[]? InventoryInfos)> LoadPlayerInventoryData(int ReqPlayerId,int InventoryPage)
+    public async Task<(CSCommon.ErrorCode ErrorCode, InventoryInfo[]? InventoryInfos)> LoadPlayerInventoryData(int ReqPlayerId, int InventoryPage)
     {
 
         try
         {
-           
+
             // 최대 9칸 까지만 가져온다.
-            var InventoryDatas = await _mySqlQueryFactory.Query("inventory")
+            var InventoryDatas = await _gameDb.GetQueryFactory().Query("inventory")
                                 .Select("InventoryIndex", "ItemCode", "Count")
                                 .Where("PlayerId", ReqPlayerId)
-                                .OrderBy("InventoryIndex").ForPage(InventoryPage,perPage:9)
+                                .OrderBy("InventoryIndex").ForPage(InventoryPage, perPage: 9)
                                 .GetAsync<InventoryInfo>();
             if (InventoryDatas is not null)
             {
@@ -64,18 +47,18 @@ public class InGameDb : IInGameDb
             return (ErrorCode: CSCommon.ErrorCode.LoadPlayerDataErrorException, InventoryInfos: null);
         }
     }
-  
+
     public async Task<(CSCommon.ErrorCode ErrorCode, MailInfo[]? MailInfos)> LoadPlayerMailBoxData(int ReqPlayerId, int MailBoxPage)
     {
 
         try
         {
-      
-            var mailInfos = await _mySqlQueryFactory.Query("mailbox")
+
+            var mailInfos = await _gameDb.GetQueryFactory().Query("mailbox")
                                    .Select("MailIndex", "ItemCode", "ItemCount", "RecievedTick", "ExpirationTick")
                                    .Where("PlayerId", ReqPlayerId)
                                    .OrderBy("MailIndex")
-                                   .ForPage(MailBoxPage,perPage:5)
+                                   .ForPage(MailBoxPage, perPage: 5)
                                    .GetAsync<MailInfo>();
 
             if (mailInfos is not null)
@@ -100,7 +83,7 @@ public class InGameDb : IInGameDb
 
         try
         {
-            var playerableCharacterDatas = await _mySqlQueryFactory.Query("playerinfo")
+            var playerableCharacterDatas = await _gameDb.GetQueryFactory().Query("playerinfo")
                                                 .Select("PlayerId", "Class", "Level")
                                                 .Where("PlayerEmail", email)
                                                 .Limit(3)
@@ -120,12 +103,5 @@ public class InGameDb : IInGameDb
             _logger.ZLogError($"[InGameRepository.LoadPlayerInfoData] ErrorCode: {CSCommon.ErrorCode.LoadPlayerDataErrorException}");
             return (ErrorCode: CSCommon.ErrorCode.LoadPlayerDataErrorException, playerInfos: null);
         }
-    }
-
-
-    public QueryFactory GetQueryFactory() { return _mySqlQueryFactory; }
-    public void Dispose()
-    {
-        _mySqlDbConnection.Close();
     }
 }
