@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using ZLogger;
 using System;
 using Newtonsoft.Json;
+using Com2usProject.ServiceInterface;
 
 namespace Com2usProject.Controllers;
 
@@ -16,26 +17,32 @@ namespace Com2usProject.Controllers;
 [ApiController]
 public class LoadPlayerDataController : ControllerBase
 {
-    readonly IInGameDb _gameDb;
+    readonly IPlayableCharacterStatusData _characterStatusHandler;
+    readonly IPlayerMailBoxData _mailBoxHandler;
+    readonly IPlayerInventoryData _inventoryHandler;
+
+
     readonly IRedisDb  _redisDb;
     readonly ILogger<LoadPlayerDataController> _logger;
 
-    public LoadPlayerDataController(ILogger<LoadPlayerDataController> logger, IInGameDb inGameDb, IRedisDb redisDb)
+    public LoadPlayerDataController(ILogger<LoadPlayerDataController> logger, IPlayableCharacterStatusData csHandler,IPlayerInventoryData piHandler,IPlayerMailBoxData pmHandler,
+        IRedisDb redisDb)
     {
         _logger = logger;
-        _gameDb = inGameDb;
+        _characterStatusHandler = csHandler;
+        _inventoryHandler = piHandler;
+        _mailBoxHandler = pmHandler;
         _redisDb = redisDb;
     }
 
 
-   
 
     [HttpPost("/LoadPlayerInventoryData")]
-    public async Task<LoadPlayerInventoryDataRes> LoadSelectedPlayerInventoryData(LoadPlayableCharacterDataReq request)
+    public async Task<LoadPlayerInventoryDataRes> LoadSelectedPlayerInventoryData(LoadPlayerInventoryDataReq request)
     {
 
-        var resultInventoryData = await _gameDb.LoadPlayerInventoryData(request.PlayerId, 1);
-        
+        var resultInventoryData = await _inventoryHandler.LoadInventory(request.PlayerId, request.InventoryPage);
+        _redisDb.FinishPlayerRequest(request.PlayerId);
         LoadPlayerInventoryDataRes response = new LoadPlayerInventoryDataRes();
 
         if (resultInventoryData.ErrorCode == CSCommon.ErrorCode.ErrorNone)
@@ -60,16 +67,16 @@ public class LoadPlayerDataController : ControllerBase
     }
 
     [HttpPost("/LoadPlayerMailData")]
-    public async Task<LoadPlayerMailBoxDataRes> LoadSelectedPlayerMailData(LoadPlayableCharacterDataReq request)
+    public async Task<LoadPlayerMailBoxDataRes> LoadSelectedPlayerMailData(LoadPlayerMailBoxDataReq request)
     {
 
-        var resultMailData = await _gameDb.LoadPlayerMailBoxData(request.PlayerId, 1);
+        var resultMailData = await _mailBoxHandler.LoadMail(request.PlayerId, request.MailBoxPage);
         LoadPlayerMailBoxDataRes response = new LoadPlayerMailBoxDataRes();
-
+        _redisDb.FinishPlayerRequest(request.PlayerId);
         if (resultMailData.ErrorCode == CSCommon.ErrorCode.ErrorNone)
         {
 
-            if (resultMailData.MailInfos.Length > 0)
+            if (resultMailData.MailInfos is not null)
             {
                 response.MailBoxInfos = "";
                 List<MailInfo> ml = new List<MailInfo>();

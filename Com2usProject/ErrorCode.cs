@@ -20,6 +20,17 @@ namespace CSCommon;
     LoadPlayerDataErrorException,
     LoadPlayerDataErrorInvaildId,
 
+    InventoryErrorAddItemException,
+    InventoryErrorUseOrDropItemException,
+
+
+    MailBoxReciveMailError,
+    MailBoxSendMailError,
+    MailBoxUpdateMailError,
+    MailBoxDeleteError,
+ 
+  
+
  }
 
 public enum RequestType

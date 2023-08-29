@@ -1,8 +1,8 @@
 ﻿using Com2usProject.ReqResModel;
-using Com2usProject.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZLogger;
+using Com2usProject.ServiceInterface;
 
 namespace Com2usProject.Controllers;
 

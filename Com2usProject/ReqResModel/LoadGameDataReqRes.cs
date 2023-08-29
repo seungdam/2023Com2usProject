@@ -3,9 +3,14 @@ using System.Text.Json.Nodes;
 
 namespace Com2usProject.ReqResModel;
 
-public class LoadPlayableCharacterDataReq : BaseGameDataReq
+public class LoadPlayerInventoryDataReq : BaseGameDataReq
 {
-    public int  PlayerId { get; set; }
+    public int InventoryPage { get; set; }
+}
+
+public class LoadPlayerMailBoxDataReq : BaseGameDataReq
+{
+    public int MailBoxPage { get; set; }
 }
 
 public class LoadPlayerInventoryDataRes : BaseGameDataRes

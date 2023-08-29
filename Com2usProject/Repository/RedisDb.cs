@@ -5,6 +5,7 @@ using CloudStructures;
 using CloudStructures.Structures;
 using CSCommon;
 using ZLogger;
+using Com2usProject.Service;
 
 namespace Com2usProject.Repository;
 
@@ -57,26 +58,57 @@ public class RedisDb : IRedisDb
         
     }
 
-    public async Task<CSCommon.ErrorCode> RegisterAuthToken(string email, string token)
+    public async Task<CSCommon.ErrorCode> RegisterAuthToken(string Email, string Token)
     {
         try
         {
            
-            var redisQuery = new RedisString<string>(_redisConn, token, null);
-            var result = await redisQuery.SetAsync(email); // 
+            var redisQuery = new RedisString<string>(_redisConn, Token, null);
+            var result = await redisQuery.SetAsync(Email); // 
 
             if (!result) return CSCommon.ErrorCode.RedisErrorFailToAddToken;
         }
         catch
-        {
-
-
+        { 
             _logger.ZLogError("Something Error Occur At AddAuthToken. Plz Check This Code");
             return ErrorCode.RedisErrorException;
             
         }
 
         return CSCommon.ErrorCode.ErrorNone;
+    }
+
+
+    public async Task<bool> RegisterPlayerRequest(int PlayerId, CSCommon.RequestType Type)
+    {
+        try
+        {
+            var redisQuery = new RedisString<CSCommon.RequestType>(_redisGameConn, PlayerId.ToString(), TimeSpan.FromSeconds(5));
+            var result = await redisQuery.SetAsync(Type, when:When.NotExists);
+            if (!result) throw new Exception();
+        }
+        catch
+        {
+            _logger.ZLogError($"[RedisDb.RegisterPlayerRequest] ErrorCode : {CSCommon.ErrorCode.RedisErrorException}");
+            return false;
+        } 
+
+        return true;
+    }
+
+    public async void FinishPlayerRequest(int PlayerId)
+    {
+        try
+        {
+            var redisQuery = new RedisString<CSCommon.RequestType>(_redisGameConn, PlayerId.ToString(), null);
+            var result = await redisQuery.DeleteAsync();
+            if (!result) throw new Exception();
+        }
+        catch
+        {
+            _logger.ZLogError($"[RedisDb.FinishPlayerRequest] ErrorCode : {CSCommon.ErrorCode.RedisErrorException}");
+        }
+
     }
 
     public RedisConnection GetConnection() { return _redisGameConn; }

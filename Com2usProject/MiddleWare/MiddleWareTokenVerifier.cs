@@ -35,16 +35,22 @@ public class MiddleWareTokenVerifier
             }
             else
             {
-
+              
                 var bodyContents = await GetBodyStringFromRequest(context.Request);
                 var token = bodyContents["AuthToken"].ToString();
-                var result = await _redisDb.CheckAuthTokenExist(token);
-                if (!result) context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; // error code 발생
+                var playerId = bodyContents["PlayerId"].Value<int>();
+                var requestType = bodyContents["RequestType"].Value<CSCommon.RequestType>();
+                _logger.LogInformation($"[MiddleWareTokenVerifier] Token : {token} | PlayerId: {playerId} | RequestType : {requestType}");
+
+                var checkResult = await _redisDb.CheckAuthTokenExist(token);
+                var registerRequestResult = await _redisDb.RegisterPlayerRequest(playerId,requestType);
+                if (!checkResult || !registerRequestResult) throw new Exception();
             }
         }
         catch(Exception e)
         {
             _logger.LogError("Something Exception Occur At TokenCheckMiddleWare");
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; // error code 발생
         }
 
         //입력받은 Headers  'AuthToken' 값을 조회후 값이없다면 errcode 출력

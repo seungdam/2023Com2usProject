@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using ZLogger;
+using Com2usProject.ServiceInterface;
 
 namespace Com2usProject.Controllers;
 
@@ -15,17 +16,17 @@ namespace Com2usProject.Controllers;
 public class LoginAccountController : ControllerBase
 {
     readonly IAccountDb _accountDb;
-    readonly IInGameDb _inGameDb;
+    readonly IPlayableCharacterStatusData _gameDbLoader;
     readonly IRedisDb _redisTokenDb;
     readonly ILogger<LoginAccountController> _logger;
     
 
-    public LoginAccountController(ILogger<LoginAccountController> logger, IAccountDb accountDb, IInGameDb inGameDb,IRedisDb redisDb)
+    public LoginAccountController(ILogger<LoginAccountController> logger, IAccountDb accountDb, IPlayableCharacterStatusData inGameDb,IRedisDb redisDb)
     {
         _logger = logger;
         _accountDb = accountDb;
         _redisTokenDb = redisDb;
-        _inGameDb = inGameDb;
+        _gameDbLoader = inGameDb;
     }
 
     [HttpPost("/Login")]
@@ -43,7 +44,7 @@ public class LoginAccountController : ControllerBase
                 var registerTokenReult = await _redisTokenDb.RegisterAuthToken(request.Email, response.AuthToken);
                 
              
-                var playerListResult = await _inGameDb.LoadPlayerInfoData(request.Email);
+                var playerListResult = await _gameDbLoader.LoadPlayerCharacterStatusData(request.Email);
 
                 if(playerListResult.ErrorCode == CSCommon.ErrorCode.ErrorNone)
                 {

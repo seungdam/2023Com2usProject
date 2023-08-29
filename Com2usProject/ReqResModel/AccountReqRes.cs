@@ -30,7 +30,7 @@ public class LoginAccountRes
 
     public String AuthToken { get; set; }
 
-   public PlayableCharacterInfo[]? PlayerInfos { get; set; }
+   public PlayableCharacterStatusInfo[]? PlayerInfos { get; set; }
     public CSCommon.ErrorCode ErrorCode { get; set; }
 
 }

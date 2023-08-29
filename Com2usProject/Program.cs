@@ -1,5 +1,7 @@
 using Com2usProject.MiddleWare;
 using Com2usProject.Repository;
+using Com2usProject.Service;
+using Com2usProject.ServiceInterface;
 using Microsoft.AspNetCore.Builder;
 using ZLogger;
 
@@ -18,8 +20,10 @@ builder.Host.ConfigureLogging(logging =>
 
 // Add services to the container.
 
-builder.Services.AddTransient<IAccountDb, AccountDb>();
+builder.Services.AddTransient<IAccountDb, HandleAccount>();
 builder.Services.AddTransient<IInGameDb, InGameDb>();
+builder.Services.AddTransient<IPlayableCharacterStatusData, HandlePlayableCharacterStatusData>();
+builder.Services.AddTransient<IPlayerInventoryData, HandlePlayerInventoryData>();
 builder.Services.AddSingleton<IRedisDb, RedisDb>();
 builder.Services.AddControllers();
 
