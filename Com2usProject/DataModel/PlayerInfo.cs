@@ -1,6 +1,6 @@
 ﻿namespace Com2usProject.DataModel;
 
-public class PlayerInfo
+public class PlayableCharacterInfo
 {
 
     public int PlayerId { get; set; }

@@ -27,7 +27,7 @@ public class RedisDb : IRedisDb
             _redisConfig = new RedisConfig("AuthTokenRedisDb", dbconfig.Value.RedisDb);
             _redisConn = new RedisConnection(_redisConfig);
 
-            _redisGameConfig = new RedisConfig("GameRedisDb", dbconfig.Value.RedisGameDb);
+            _redisGameConfig = new RedisConfig("DbCommandRedisDb", dbconfig.Value.PlayerRequestRedisDb);
             _redisGameConn = new RedisConnection(_redisGameConfig);
 
         }

@@ -22,3 +22,13 @@ namespace CSCommon;
 
  }
 
+public enum RequestType
+{
+    LoadInventoryDataInfos,
+    InsertItemToInventory,
+    DeleteItemToInventory,
+
+    LoadMailBoxDataInfos,
+    InsertMailBox,
+    DeleteMailBox,
+}

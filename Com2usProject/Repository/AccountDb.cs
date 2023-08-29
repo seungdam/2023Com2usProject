@@ -16,7 +16,7 @@ public class DbConnectionStrings
 {
     public string MySqlGameDb { get; set; }
     public string RedisDb { get; set; }
-    public string RedisGameDb { get; set; }
+    public string PlayerRequestRedisDb{ get; set; }
 }
 
 public class AccountDb : IAccountDb // 해당 Account 클래스는 MySql을 사용하므로 클래스명을 MySqlAccountDb라고 짓는다

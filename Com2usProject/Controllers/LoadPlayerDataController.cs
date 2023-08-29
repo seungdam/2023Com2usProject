@@ -31,10 +31,10 @@ public class LoadPlayerDataController : ControllerBase
    
 
     [HttpPost("/LoadPlayerInventoryData")]
-    public async Task<LoadPlayerInventoryDataRes> LoadSelectedPlayerInventoryData(LoadPlayerDataReq request)
+    public async Task<LoadPlayerInventoryDataRes> LoadSelectedPlayerInventoryData(LoadPlayableCharacterDataReq request)
     {
 
-        var resultInventoryData = await _gameDb.LoadPlayerInventoryData(request.PlayerId);
+        var resultInventoryData = await _gameDb.LoadPlayerInventoryData(request.PlayerId, 1);
         
         LoadPlayerInventoryDataRes response = new LoadPlayerInventoryDataRes();
 
@@ -60,21 +60,21 @@ public class LoadPlayerDataController : ControllerBase
     }
 
     [HttpPost("/LoadPlayerMailData")]
-    public async Task<LoadPlayerMailDataRes> LoadSelectedPlayerMailData(LoadPlayerDataReq request)
+    public async Task<LoadPlayerMailBoxDataRes> LoadSelectedPlayerMailData(LoadPlayableCharacterDataReq request)
     {
 
-        var resultMailData = await _gameDb.LoadPlayerMailData(request.PlayerId);
-        LoadPlayerMailDataRes response = new LoadPlayerMailDataRes();
+        var resultMailData = await _gameDb.LoadPlayerMailBoxData(request.PlayerId, 1);
+        LoadPlayerMailBoxDataRes response = new LoadPlayerMailBoxDataRes();
 
         if (resultMailData.ErrorCode == CSCommon.ErrorCode.ErrorNone)
         {
 
             if (resultMailData.MailInfos.Length > 0)
             {
-                response.MailInfos = "";
+                response.MailBoxInfos = "";
                 List<MailInfo> ml = new List<MailInfo>();
                 foreach (var i in resultMailData.MailInfos) ml.Add(i);
-                response.MailInfos = JsonConvert.SerializeObject(ml, Formatting.Indented);
+                response.MailBoxInfos = JsonConvert.SerializeObject(ml, Formatting.Indented);
                 response.ErrorCode = CSCommon.ErrorCode.ErrorNone;
             }
             response.ErrorCode = CSCommon.ErrorCode.ErrorNone;
