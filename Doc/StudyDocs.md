@@ -201,7 +201,7 @@ db와 연동하여 작업하는 쿼리문을 사용자가 좀 더 편하게 할 
 
  ##### + 작성한 데이터베이스 스키마
  ------------------------------------------
-  src="./DatabasSchema.PNG"
+ ![DatabaseShema](https://github.com/seungdam/2023Com2usProject/assets/51450544/33895aa0-3a7e-4e7d-8a27-c9229f8ac38araw=true))
 
 
  ##### + 각 폴더별 설명
