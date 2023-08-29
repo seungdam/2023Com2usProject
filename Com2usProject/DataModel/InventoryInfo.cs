@@ -2,7 +2,7 @@
 
 public class InventoryInfo
 {
-    public int InventoryIndex;
-    public int ItemCode;
-    public int Count;
+    public int InventoryIndex { get; set; }
+    public int ItemCode { get; set; }
+    public int Count { get; set; }
 }

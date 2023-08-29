@@ -25,10 +25,10 @@ public class RedisDb : IRedisDb
 
         try
         {
-            _redisConfig = new RedisConfig("AuthTokenRedisDb", dbconfig.Value.RedisDb);
+            _redisConfig = new RedisConfig("AuthTokenRedisDb", dbconfig.Value.RedisTokenDb);
             _redisConn = new RedisConnection(_redisConfig);
 
-            _redisGameConfig = new RedisConfig("DbCommandRedisDb", dbconfig.Value.PlayerRequestRedisDb);
+            _redisGameConfig = new RedisConfig("DbCommandRedisDb", dbconfig.Value.RedisRequestDb);
             _redisGameConn = new RedisConnection(_redisGameConfig);
 
         }
@@ -45,8 +45,8 @@ public class RedisDb : IRedisDb
         {
             var redisQuery = new RedisString<string>(_redisConn, token, null);
             var result = await redisQuery.ExistsAsync(); // 토큰이 존재하는가?
-            if (!result) return true;
-            else return false;
+            if (!result) return false;
+            else return true;
             
         }
         catch
@@ -79,11 +79,11 @@ public class RedisDb : IRedisDb
     }
 
 
-    public async Task<bool> RegisterPlayerRequest(int PlayerId, CSCommon.RequestType Type)
+    public async Task<bool> StartPlayerRequest(int PlayerId, int Type)
     {
         try
         {
-            var redisQuery = new RedisString<CSCommon.RequestType>(_redisGameConn, PlayerId.ToString(), TimeSpan.FromSeconds(5));
+            var redisQuery = new RedisString<int>(_redisGameConn, PlayerId.ToString(),TimeSpan.FromSeconds(2));
             var result = await redisQuery.SetAsync(Type, when:When.NotExists);
             if (!result) throw new Exception();
         }

@@ -17,5 +17,7 @@ public class RecvMailBoxDataReq : BaseGameDataReq
 
 public class RecvMailBoxDataRes : BaseGameDataRes
 {
-    public int DelMailIndex { get; set; }  
+    public int DelMailIndex { get; set; }
+    public String AfterInventoryInfo { get; set; } 
+    
 }

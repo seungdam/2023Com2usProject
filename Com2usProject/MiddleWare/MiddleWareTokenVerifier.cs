@@ -39,24 +39,30 @@ public class MiddleWareTokenVerifier
                 var bodyContents = await GetBodyStringFromRequest(context.Request);
                 var token = bodyContents["AuthToken"].ToString();
                 var playerId = bodyContents["PlayerId"].Value<int>();
-                var requestType = bodyContents["RequestType"].Value<CSCommon.RequestType>();
+                var requestType = bodyContents["RequestType"].Value<int>();
                 _logger.LogInformation($"[MiddleWareTokenVerifier] Token : {token} | PlayerId: {playerId} | RequestType : {requestType}");
 
                 var checkResult = await _redisDb.CheckAuthTokenExist(token);
-                var registerRequestResult = await _redisDb.RegisterPlayerRequest(playerId,requestType);
-                if (!checkResult || !registerRequestResult) throw new Exception();
+                var registerRequestResult = await _redisDb.StartPlayerRequest(playerId, requestType);
+                if (!checkResult || !registerRequestResult)
+                {
+                    _redisDb.FinishPlayerRequest(playerId);
+                    throw new Exception();
+                }
+                await _next(context);
             }
         }
         catch(Exception e)
         {
             _logger.LogError("Something Exception Occur At TokenCheckMiddleWare");
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; // error code 발생
+           
         }
 
         //입력받은 Headers  'AuthToken' 값을 조회후 값이없다면 errcode 출력
 
+       
 
-        await _next(context);
     }
 
     async Task<JObject> GetBodyStringFromRequest(HttpRequest request)

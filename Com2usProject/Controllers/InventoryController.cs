@@ -10,8 +10,9 @@ using Newtonsoft.Json;
 
 namespace Com2usProject.Controllers;
 
-[Route("api/[controller]")]
+
 [ApiController]
+[Route("api/[controller]")]
 public class InventoryController : ControllerBase
 {
     readonly IPlayerInventoryData _inventoryHandler;
@@ -54,4 +55,23 @@ public class InventoryController : ControllerBase
 
         return response;
     }
+
+    [HttpPost("/AddItemToInventoryData")]
+    public async Task<UpdateInventoryDataRes> AddItemToPlayerInventoryData(UpdateInventoryDataReq request)
+    {
+        var response = new UpdateInventoryDataRes();
+        var handleResult = await _inventoryHandler.AddItemToInventory(request.PlayerId, request.ItemCode, request.ItemCount);
+        _redisDb.FinishPlayerRequest(request.PlayerId);
+
+        response.ErrorCode = handleResult.ErrorCode;
+        if(handleResult.ErrorCode == CSCommon.ErrorCode.ErrorNone && handleResult.NewInventoryInfo is not null)
+        {
+            response.InventoryInfo = JsonConvert.SerializeObject(handleResult.NewInventoryInfo, Formatting.Indented);
+
+        }
+        
+        return response;
+
+    }
+
 }

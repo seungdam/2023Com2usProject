@@ -6,6 +6,8 @@ using System.Reflection;
 
 using Com2usProject.ServiceInterface;
 using ZLogger;
+using CSCommon;
+using System.Transactions;
 
 namespace Com2usProject.Service;
 
@@ -19,7 +21,7 @@ public class HandleInventoryData: IPlayerInventoryData
         _gameDb = gameDb;
         _logger = logger;
     }
-    public async void InsertNewItem(int PlayerId,int NewItemCode, int NewItemCount)
+    public async Task<bool> InsertNewItem(int PlayerId,int NewItemCode, int NewItemCount)
     {
 
         try
@@ -31,22 +33,27 @@ public class HandleInventoryData: IPlayerInventoryData
                 {
 
                     PlayerId = PlayerId,
-                    InventoryIndex = nextIndex,
+                    InventoryIndex = nextIndex + 1,
                     ItemCode = NewItemCode,
                     Count = NewItemCount
                 }
             );
 
-            if (count != 1) _logger.ZLogDebug($"[HandleInventory.InsertNewItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorInsItem}");
+            if (count != 1)
+            {
+                _logger.ZLogDebug($"[HandleInventory.InsertNewItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorInsItem}");
+                return false;
+            }
         }
        catch
         {
             _logger.ZLogError($"[HandleInventory.InsertNewItem] ErrorCode : Insert Exception Occur");
+            return false;
         }
-      
+        return true;
     }
 
-    public async void IncreaseItem(int PlayerId, int InventoryIndex, int IncreaseValue)
+    public async Task<bool> IncreaseItem(int PlayerId, int InventoryIndex, int IncreaseValue)
     {
 
         try
@@ -57,16 +64,22 @@ public class HandleInventoryData: IPlayerInventoryData
                 .IncrementAsync("Count", IncreaseValue);
 
 
-            if (count != 1) _logger.ZLogDebug($"[HandleInventory.IncreaseItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorIncItem}");
+            if (count != 1)
+            {
+                _logger.ZLogDebug($"[HandleInventory.IncreaseItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorIncItem}");
+                return false;
+            }
         }
         catch
         {
             _logger.ZLogError("[HandleInventory.IncreaseItem] Error : DeCrease Exception Occur");
+            return false;
         }
+        return true;
         
     }
 
-    public async void DecreaseItem(int PlayerId, int InventoryIndex, int DecreaseValue)
+    public async Task<bool> DecreaseItem(int PlayerId, int InventoryIndex, int DecreaseValue)
     {
 
         try
@@ -77,17 +90,22 @@ public class HandleInventoryData: IPlayerInventoryData
                .DecrementAsync("Count", DecreaseValue);
 
 
-            if (count != 1) _logger.ZLogDebug($"[HandleInventory.DecreaseItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorDecItem}");
+            if (count != 1)
+            {
+                _logger.ZLogDebug($"[HandleInventory.DecreaseItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorDecItem}");
+                return false;
+            }
      
         }
         catch
         {
             _logger.ZLogError("[HandleInventory.IncreaseItem] Error : DeCrease Exception Occur");
+            return false;
         }
-       
+        return true;
     }
     
-    public async void DelItem(int PlayerId, int InventoryIndex, int ItemCode)
+    public async Task<bool> DelItem(int PlayerId, int InventoryIndex, int ItemCode)
     {
 
         try
@@ -97,14 +115,18 @@ public class HandleInventoryData: IPlayerInventoryData
              .Where("InventoryIndex", InventoryIndex)
              .DeleteAsync();
 
-            if (count != 1) _logger.ZLogDebug($"[HandleInventory.IncreaseItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorDelItem}");
+            if (count != 1)
+            {
+                _logger.ZLogDebug($"[HandleInventory.IncreaseItem] ErrorCode : {CSCommon.ErrorCode.InventoryErrorDelItem}");
+                return false;
+            }
         }
         catch 
         {
             _logger.ZLogError("[HandleInventory.DelItem] Error: DelItem Exception Occur");
-
+            return false;
         }
-
+        return true;
     }
 
     // ======================= InterFace Method ===================================
@@ -141,35 +163,42 @@ public class HandleInventoryData: IPlayerInventoryData
     }
 
 
-    public async Task<CSCommon.ErrorCode> AddItemToInventory(int PlayerId, int GetItemCode, int ItemCount)
+    public async Task<(CSCommon.ErrorCode ErrorCode, InventoryInfo? NewInventoryInfo)> AddItemToInventory(int PlayerId, int GetItemCode, int ItemCount)
     {
 
+        InventoryInfo newInventroyInfo = new InventoryInfo();
         try
         {
-            var sameItemInventoryIndex = await _gameDb.GetQueryFactory().Query("inventory")
-                                        .Select("InventoryIndex")
+            var sameItemSpace = await _gameDb.GetQueryFactory().Query("inventory")
+                                        .Select("InventoryIndex","ItemCode","Count")
                                         .Where("PlayerId", PlayerId)
                                         .Where("ItemCode", GetItemCode)
-                                        .FirstAsync();
+                                        .FirstOrDefaultAsync<InventoryInfo>();
 
-            if(sameItemInventoryIndex is not null)
+            if(sameItemSpace is not null)
             {
-              IncreaseItem(PlayerId, sameItemInventoryIndex, ItemCount);
+              var handleResult = await IncreaseItem(PlayerId, sameItemSpace.InventoryIndex, ItemCount);
             }
             else
             {
-              InsertNewItem(PlayerId, GetItemCode, ItemCount);
+              var handleReuslt = InsertNewItem(PlayerId, GetItemCode, ItemCount);
             }
 
+            var afterInventoryInfo = await _gameDb.GetQueryFactory().Query("inventory")
+                                       .Select("InventoryIndex", "ItemCode", "Count")
+                                       .Where("PlayerId", PlayerId)
+                                       .Where("ItemCode", GetItemCode)
+                                       .FirstOrDefaultAsync<InventoryInfo>();
 
+            return (ErrorCode: CSCommon.ErrorCode.ErrorNone, afterInventoryInfo);
         }
         catch 
         {
             _logger.ZLogError("[HandleInventoryData.AddItemToInventory] SameItemInventoryIndex Exception");
-            return CSCommon.ErrorCode.InventoryErrorUseOrDropItemException;
+            return (CSCommon.ErrorCode.InventoryErrorUseOrDropItemException, null);
         }
 
-        return CSCommon.ErrorCode.ErrorNone;
+        
     }
 
 
@@ -178,7 +207,11 @@ public class HandleInventoryData: IPlayerInventoryData
 
         try
         {
-            var curCount = await _gameDb.GetQueryFactory().Query("inventory").Select("ItemCount").Where("PlayerId", PlayerId).Where("InventoryIndex", InventoryIndex).FirstAsync();
+            var curCount = await _gameDb.GetQueryFactory().Query("inventory")
+                                    .Select("Count")
+                                    .Where("PlayerId", PlayerId)
+                                    .Where("InventoryIndex", InventoryIndex)
+                                    .FirstAsync();
 
             if (curCount - DropItemCount <= 0)
             {

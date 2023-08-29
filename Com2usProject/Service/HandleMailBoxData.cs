@@ -36,26 +36,28 @@ public class HandleMailBoxData : IPlayerMailBoxData
             return CSCommon.ErrorCode.MailBoxDeleteError;
         }
     }
-    public async Task<CSCommon.ErrorCode> RecieveMail(int PlayerId, int RecvMailIndex)
+    public async Task<(CSCommon.ErrorCode ErrorCode, InventoryInfo? AfterInventoryInfo)> RecvMail(int PlayerId, int RecvMailIndex)
     {
         try
         {
             var mailInfo = await _gameDb.GetQueryFactory().Query("mailbox")
-                                       .Select("MailIndex", "ItemCode", "ItemCount", "RecievedTime", "ExpirationTime")
+                                       .Select("MailIndex", "ItemCode", "ItemCount", "ReceiveDate", "ExpirationDate")
                                        .Where("PlayerId", PlayerId)
-                                       .Where("Index", RecvMailIndex)
+                                       .Where("MailIndex", RecvMailIndex)
                                        .FirstAsync<MailInfo>();
 
-            var handleResult = await _inventoryHandler.AddItemToInventory(PlayerId, mailInfo.ItemCode, mailInfo.ItemCount);
+            var inventoryHandleResult = await _inventoryHandler.AddItemToInventory(PlayerId, mailInfo.ItemCode, mailInfo.ItemCount);
 
-            handleResult = await DelMail(PlayerId, RecvMailIndex);
+            if (inventoryHandleResult.ErrorCode != CSCommon.ErrorCode.ErrorNone) throw new Exception();
 
-            return handleResult;
+            var delMailHandleResult = await DelMail(PlayerId, RecvMailIndex);
+
+            return (ErrorCode: delMailHandleResult, AfterInventoryInfo : inventoryHandleResult.NewInventoryInfo);
         }
         catch
         {
 
-            return CSCommon.ErrorCode.MailBoxReciveMailError;
+            return (ErrorCode:CSCommon.ErrorCode.MailBoxReciveMailError, AfterInventoryInfo: null);
         }
 
     }
@@ -67,7 +69,7 @@ public class HandleMailBoxData : IPlayerMailBoxData
         {
 
             var mailInfos = await _gameDb.GetQueryFactory().Query("mailbox")
-                                   .Select("MailIndex", "ItemCode", "ItemCount", "RecievedTime", "ExpirationTime")
+                                   .Select("MailIndex", "ItemCode", "ItemCount", "ReceiveDate", "ExpirationDate")
                                    .Where("PlayerId", ReqPlayerId)
                                    .OrderBy("MailIndex")
                                    .ForPage(MailBoxPage, perPage: 5)

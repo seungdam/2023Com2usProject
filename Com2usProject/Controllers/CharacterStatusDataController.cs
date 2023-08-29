@@ -13,8 +13,9 @@ using Com2usProject.ServiceInterface;
 
 namespace Com2usProject.Controllers;
 
-[Route("api/[controller]")]
+
 [ApiController]
+[Route("api/[controller]")]
 public class CharacterStatusDataController : ControllerBase
 {
     readonly IPlayableCharacterStatusData _characterStatusHandler;

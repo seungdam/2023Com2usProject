@@ -9,8 +9,9 @@ using Newtonsoft.Json;
 
 namespace Com2usProject.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
+
+[Route("api/[controller]")]
 public class MailBoxController : ControllerBase
 {
     readonly IPlayerMailBoxData _mailBoxHandler;
@@ -55,19 +56,21 @@ public class MailBoxController : ControllerBase
     [HttpPost("/RecvMailItem")]
     public async Task<RecvMailBoxDataRes> RecvMailData(RecvMailBoxDataReq request)
     {
-        var resultErrorCode = await _mailBoxHandler.RecieveMail(request.PlayerId, request.RecvMailIndex);
+        var resultVar = await _mailBoxHandler.RecvMail(request.PlayerId, request.RecvMailIndex);
         var response = new RecvMailBoxDataRes();
         
-        response.ErrorCode = resultErrorCode;
+        response.ErrorCode = resultVar.ErrorCode;
         
-        if (resultErrorCode != CSCommon.ErrorCode.ErrorNone)
+        if (resultVar.ErrorCode != CSCommon.ErrorCode.ErrorNone)
         {
             response.DelMailIndex = -1;
+            _logger.ZLogError($"[MailController.RecvMailData] ErrorCode {resultVar.ErrorCode} ");
         }
         else
         {
             response.DelMailIndex = request.RecvMailIndex;
-            _logger.ZLogError($"[MailController.RecvMailData] ErrorCode {resultErrorCode} ");
+            response.AfterInventoryInfo = JsonConvert.SerializeObject(resultVar.AfterInventoryInfo, Formatting.Indented);
+            
         }  
 
         return response;

@@ -15,6 +15,11 @@ public class LoadPlayerInventoryDataRes : BaseGameDataRes
     public String InventoryInfos { get; set; } 
 }
 
+public class UpdateInventoryDataReq : BaseGameDataReq
+{
+    public int ItemCode { get; set; }
+    public int ItemCount { get; set; }
+}
 
 public class UpdateInventoryDataRes : BaseGameDataRes
 {
